@@ -1,12 +1,6 @@
 @media screen and (max-width: 768px) {
-    nav ul {
+    .navbar {
         display: none;
-    }
-
-    nav .logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .hero, .start {
