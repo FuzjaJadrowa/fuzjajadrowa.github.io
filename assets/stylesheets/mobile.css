@@ -1,15 +1,6 @@
 @media screen and (max-width: 768px) {
-    .navbar {
-        padding: 0 20px;
-        flex-direction: column;
-        height: auto;
-        gap: 10px;
-    }
-
-    .navbar ul {
-        flex-direction: column;
-        gap: 15px;
-        align-items: center;
+    nav {
+        display: none;
     }
 
     .hero, .start {
