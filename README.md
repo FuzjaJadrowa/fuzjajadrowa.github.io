@@ -1,0 +1,1 @@
+# fuzjajadrowa.pl
