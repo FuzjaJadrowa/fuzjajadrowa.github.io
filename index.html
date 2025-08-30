@@ -7,19 +7,27 @@
     <link rel="icon" href="https://i.ibb.co/Zzy98hDT/logo.png">
     <meta name="description" content="Oficjalna strona Fuzji Jądrowej - twórca video i developer.">
     <link rel="stylesheet" href="assets/stylesheets/fonts.css?v=1">
-    <link rel="stylesheet" href="assets/stylesheets/styles.css?v=2">
-    <link rel="stylesheet" href="assets/stylesheets/mobile.css?v=3">
+    <link rel="stylesheet" href="assets/stylesheets/styles.css?v=3">
+    <link rel="stylesheet" href="assets/stylesheets/mobile.css?v=4">
 </head>
 <body>
+<div class="language-switcher">
+    <div class="lang-btn" data-lang="pl">
+        <img src="https://flagcdn.com/w20/pl.png" alt="PL">
+    </div>
+    <div class="lang-btn" data-lang="en">
+        <img src="https://flagcdn.com/w20/gb.png" alt="EN">
+    </div>
+</div>
 <header class="navbar">
     <div class="logo">
         <img src="https://i.ibb.co/Zzy98hDT/logo.png" alt="Logo">
         <span>FUZJA JĄDROWA</span>
     </div>
     <div class="hamburger" onclick="toggleMenu()">
-        <div></div>
-        <div></div>
-        <div></div>
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
     <nav>
         <ul>
@@ -28,6 +36,10 @@
             <li><a href="#portfolio">PORTFOLIO</a></li>
             <li><a href="#archive">ARCHIWUM</a></li>
             <li><a href="#contact">KONTAKT</a></li>
+            <div class="language-toggle">
+                <button id="lang-pl" style="background-image: url('https://flagcdn.com/w20/pl.png');"></button>
+                <button id="lang-en" style="background-image: url('https://flagcdn.com/w20/gb.png');"></button>
+            </div>
         </ul>
     </nav>
 </header>
@@ -156,5 +168,6 @@
 <script src="assets/scripts/script.js"></script>
 <script src="assets/scripts/popup.js"></script>
 <script src="assets/scripts/navbar.js"></script>
+<script src="assets/scripts/mainlang.js"></script>
 </body>
 </html>

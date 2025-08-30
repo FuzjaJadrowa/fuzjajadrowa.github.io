@@ -579,3 +579,54 @@ footer {
     background: #00cc66;
     color: #fff;
 }
+
+.language-switcher {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 2000;
+}
+
+.lang-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.lang-btn img {
+    width: 20px;
+    height: auto;
+}
+
+.lang-btn:hover {
+    background: #555;
+}
+
+.language-toggle {
+    display: none;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.language-toggle button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background-color: #333;
+    background-size: cover;
+    transition: transform 0.2s;
+}
+
+.language-toggle button:hover {
+    transform: scale(1.1);
+}
