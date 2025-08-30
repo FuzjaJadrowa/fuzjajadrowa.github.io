@@ -475,3 +475,115 @@ footer {
     font-weight: 700;
     border-radius: 10px;
 }
+
+.archive, .project-page {
+    text-align: center;
+    margin: 60px auto;
+    max-width: 900px;
+    color: white;
+}
+
+.archive-desc {
+    margin: 20px 0;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.archive-btn {
+    margin: 20px;
+    padding: 20px 20px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 50px;
+}
+
+.projects-grid {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.project-btn {
+    background: #222;
+    border: 2px solid #333;
+    padding: 20px;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: 0.3s;
+    color: white;
+    font-weight: bold;
+}
+
+.project-btn:hover {
+    border-color: #0ff;
+    background: #333;
+}
+
+.project-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 15px;
+    object-fit: contain;
+}
+
+.project-page .project-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.downloads-title {
+    margin-top: 40px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.downloads-grid {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.download-btn {
+    background: #064d2f;
+    padding: 15px 50px;
+    border-radius: 10px;
+    flex: 1 1 calc(33% - 15px);
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.download-btn:hover {
+    background: #0a7d4f;
+}
+
+.back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #444;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s;
+    z-index: 100;
+}
+
+.back-btn:hover {
+    background: #00cc66;
+    color: #fff;
+}
