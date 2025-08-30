@@ -57,7 +57,7 @@ const translations = {
         start: {
             title: "FUZJA JĄDROWA",
             subtitle: "Video creator and developer",
-            text: "I create and edit films, as well as program and create mods for Minecraft.",
+            text: "I create and edit films, as well as programming and create mods for Minecraft.",
             btnPortfolio: "See portfolio",
             btnOrder: "Order a project"
         },
