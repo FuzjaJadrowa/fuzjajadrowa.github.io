@@ -489,14 +489,6 @@ footer {
     line-height: 1.6;
 }
 
-.archive-btn {
-    margin: 20px;
-    padding: 20px 20px;
-    font-size: 18px;
-    font-weight: 700;
-    border-radius: 50px;
-}
-
 .projects-grid {
     margin-top: 40px;
     display: flex;
