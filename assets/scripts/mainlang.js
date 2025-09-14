@@ -1,4 +1,3 @@
-// assets/scripts/mainlang.js
 const translations = {
     pl: {
         nav: {
@@ -7,6 +6,10 @@ const translations = {
             portfolio: "PORTFOLIO",
             archive: "ARCHIWUM",
             contact: "KONTAKT"
+        },
+        popup: {
+            copied: "Skopiowano email!",
+            error: "Błąd kopiowania!"
         },
         start: {
             title: "FUZJA JĄDROWA",
@@ -53,6 +56,10 @@ const translations = {
             portfolio: "PORTFOLIO",
             archive: "ARCHIVE",
             contact: "CONTACT"
+        },
+        popup: {
+            copied: "Email copied!",
+            error: "Copy failed!"
         },
         start: {
             title: "FUZJA JĄDROWA",
@@ -138,6 +145,9 @@ function setLanguage(lang) {
     document.querySelector('.email-btn span').textContent = t.contact.email
 
     document.querySelector('footer .footer-text').textContent = t.footer
+
+    localStorage.setItem("lang", lang);
+    window.currentLang = lang;
 }
 
 document.querySelectorAll(".lang-btn").forEach(btn => {

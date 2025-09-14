@@ -12,9 +12,9 @@ function showPopup(message, duration = 2000) {
 if (emailBtn) {
     emailBtn.addEventListener("click", () => {
         navigator.clipboard.writeText("dlafuzji@gmail.com").then(() => {
-            showPopup("Skopiowano email!");
+            showPopup(translations[window.currentLang].popup.copied);
         }).catch(() => {
-            showPopup("Błąd kopiowania!", 2000);
+            showPopup(translations[window.currentLang].popup.error, 2000);
         });
     });
 }
