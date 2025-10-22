@@ -1,0 +1,81 @@
+{
+  "pl": {
+    "nav": {
+      "start": "START",
+      "about": "O MNIE",
+      "portfolio": "PORTFOLIO",
+      "archive": "ARCHIWUM",
+      "contact": "KONTAKT"
+    },
+    "popup": {
+      "copied": "Skopiowano email!",
+      "error": "Błąd kopiowania!"
+    },
+    "start": {
+      "title": "FUZJA JĄDROWA",
+      "subtitle": "Twórca video i developer",
+      "text": "Zajmuje się tworzeniem i montowaniem filmów oraz programuje i tworzę mody do Minecraft.",
+      "btnPortfolio": "Zobacz portfolio",
+      "btnOrder": "Zamów projekt"
+    },
+    "about": {
+      "title": "O MNIE",
+      "text": "Siema! Nazywam się <span class='bold'>Fuzja</span> i jestem <span class='bold-red'>montażystą filmów</span> od kilku lat. Od niedawna zacząłem zajmować się również <span class='bold-green'>programowaniem</span> modów do Minecrafta oraz innych cyfrowych wyzwań.",
+      "knownAs": "W internecie znany jestem jako:",
+      "modrinth": "Modrinth - Moje projekty Minecraft",
+      "donate": "Jeśli podobają ci się moje projekty, możesz bezinteresownie przekazać mi dotacje:",
+      "stats": ["100+ stworzonych filmów", "Niska cena", "Gwarancja jakości"]
+    },
+    "archivePage": {
+      "title": "Archiwum",
+      "desc": "Tutaj znajdziesz wszystkie projekty modów, aplikacji, gier i innych rzeczy, które stworzyłem. Niektóre z nich mogą być już niedostępne na innych stronach internetowych.",
+      "back": "← Powrót",
+      "projects": {
+        "guivideodownloader": "Przydatne narzędzie do pobierania filmów z różnych stron.",
+        "daysofdestiny": "Nowe światy wyglądają tak, jakby ktoś już tam był... Ale kto?",
+        "maslackitrakt": "Resource pack stworzony przez Kaki_karol, opubilikowany na CurseForge przeze mnie. Umieszczony tutaj z powodu archiwizacji oraz usunięcia go na CurseForge. Oryginalny opis: Kompleksowy, ciekawy resoruce pack, który dodaje rzeczy ikoniczne, znane z streamów Tidzimiego i nie tylko!"
+      }
+    },
+    "footer": "© 2025 Fuzja Jądrowa. Wszystkie prawa zastrzeżone."
+  },
+
+  "en": {
+    "nav": {
+      "start": "HOME",
+      "about": "ABOUT ME",
+      "portfolio": "PORTFOLIO",
+      "archive": "ARCHIVE",
+      "contact": "CONTACT"
+    },
+    "popup": {
+      "copied": "Email copied!",
+      "error": "Copy failed!"
+    },
+    "start": {
+      "title": "FUZJA JĄDROWA",
+      "subtitle": "Video creator and developer",
+      "text": "I create and edit films, as well as programming and create mods for Minecraft.",
+      "btnPortfolio": "See portfolio",
+      "btnOrder": "Order a project"
+    },
+    "about": {
+      "title": "ABOUT ME",
+      "text": "Hi! My name is <span class='bold'>Fuzja</span> and I have been a <span class='bold-red'>video editor</span> for several years. Recently, I also started <span class='bold-green'>programming</span> Minecraft mods and taking on other digital challenges.",
+      "knownAs": "On the internet I'm known as:",
+      "modrinth": "Modrinth - My Minecraft projects",
+      "donate": "If you like my projects, you can support me with a donation:",
+      "stats": ["100+ created videos", "Low price", "Quality guarantee"]
+    },
+    "archivePage": {
+      "title": "Archive",
+      "desc": "Here you can find all the mods, apps, games, and other projects I have created. Some of them may no longer be available on other websites.",
+      "back": "← Back",
+      "projects": {
+        "guivideodownloader": "A useful tool for downloading videos from various sites.",
+        "daysofdestiny": "The new worlds look like someone has been there before... But who?",
+        "maslackitrakt": "A resource pack created by Kaki_karol, published on CurseForge by me. Posted here due to archiving and deletion on CurseForge. Original description: A comprehensive, interesting resource pack that adds iconic content from Tidzimi's streams and beyond!"
+      }
+    },
+    "footer": "© 2025 Fuzja Jadrowa. All rights reserved."
+  }
+}
