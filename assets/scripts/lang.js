@@ -35,6 +35,29 @@ function setLanguage(lang) {
         document.querySelector('.modrinth-btn').innerHTML = `<img src="https://i.ibb.co/qY83SpBv/modrinth-new.webp" alt=""> ${t.about.modrinth}`
         document.querySelector('.about-text h3 + div + h3').textContent = t.about.donate
         document.querySelectorAll('.about-stats .stat p').forEach((el, i) => el.textContent = t.about.stats[i])
+
+        document.querySelector('.portfolio-title').textContent = t.portfolio.title
+        document.querySelectorAll('.portfolio-item').forEach((item, i) => {
+            item.querySelector('h3').textContent = t.portfolio.items[i].title
+            item.querySelector('p').textContent = t.portfolio.items[i].text
+            const tags = item.querySelector('.portfolio-tags')
+            tags.innerHTML = ""
+            t.portfolio.items[i].tags.forEach(tag => {
+                const span = document.createElement('span')
+                span.textContent = tag
+                tags.appendChild(span)
+            })
+            item.querySelector('.portfolio-year').textContent = t.portfolio.items[i].year
+        })
+
+        document.querySelector('.archive-title').textContent = t.archive.title
+        document.querySelector('.archive-text').textContent = t.archive.text
+        document.querySelector('.archive-btn').textContent = t.archive.btn
+
+        document.querySelector('.contact-title').textContent = t.contact.title
+        document.querySelector('.contact-text p').textContent = t.contact.text
+        document.querySelector('.email-btn span').textContent = t.contact.email
+
         document.querySelector('footer .footer-text').textContent = t.footer
     }
 

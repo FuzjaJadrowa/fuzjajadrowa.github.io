@@ -26,8 +26,21 @@
       "donate": "Jeśli podobają ci się moje projekty, możesz bezinteresownie przekazać mi dotacje:",
       "stats": ["100+ stworzonych filmów", "Niska cena", "Gwarancja jakości"]
     },
+    "portfolio": {
+      "title": "PORTFOLIO",
+      "items": [
+        { "title": "Overlay dla jheyvu", "text": "Prosty animowany overlay z gwiadeczkami i motylkami.", "tags": ["Photoshop", "After Effects"], "year": "2025" },
+        { "title": "GUI Video Downloader", "text": "Aplikacja do pobierania video i audio z różnych stron.", "tags": ["Python", "JSON"], "year": "2025" },
+        { "title": "Days Of Destiny", "text": "Horrorowy mod do Minecrafta z funkcjami wychodzącymi poza grę.", "tags": ["Java"], "year": "2025" }
+      ]
+    },
+    "archive": {
+      "title": "ARCHIWUM",
+      "text": "Tutaj znajdziesz wszystkie moje projekty dostępne do pobrania. Niektóre z nich mogą być już niedostępne na innych stronach.",
+      "btn": "Zobacz"
+    },
     "archivePage": {
-      "title": "Archiwum",
+      "title": "ARCHIWUM",
       "desc": "Tutaj znajdziesz wszystkie projekty modów, aplikacji, gier i innych rzeczy, które stworzyłem. Niektóre z nich mogą być już niedostępne na innych stronach internetowych.",
       "back": "← Powrót",
       "projects": {
@@ -35,6 +48,11 @@
         "daysofdestiny": "Nowe światy wyglądają tak, jakby ktoś już tam był... Ale kto?",
         "maslackitrakt": "Resource pack stworzony przez Kaki_karol, opubilikowany na CurseForge przeze mnie. Umieszczony tutaj z powodu archiwizacji oraz usunięcia go na CurseForge. Oryginalny opis: Kompleksowy, ciekawy resoruce pack, który dodaje rzeczy ikoniczne, znane z streamów Tidzimiego i nie tylko!"
       }
+    },
+    "contact": {
+      "title": "KONTAKT",
+      "text": "Jeśli chcesz zamówić projekt dotyczący zaprogramowania czegoś lub zmontowania jakiegoś filmu odezwij się na maila i zobaczymy czy będę wstanie zrealizować twoje oczekiwania!",
+      "email": "Email: dlafuzji@gmail.com"
     },
     "footer": "© 2025 Fuzja Jądrowa. Wszystkie prawa zastrzeżone."
   },
@@ -66,8 +84,21 @@
       "donate": "If you like my projects, you can support me with a donation:",
       "stats": ["100+ created videos", "Low price", "Quality guarantee"]
     },
+    "portfolio": {
+      "title": "PORTFOLIO",
+      "items": [
+        { "title": "Overlay for jheyvu", "text": "Simple animated overlay with stars and butterflies.", "tags": ["Photoshop", "After Effects"], "year": "2025" },
+        { "title": "GUI Video Downloader", "text": "Application for downloading video and audio from various sites.", "tags": ["Python", "JSON"], "year": "2025" },
+        { "title": "Days Of Destiny", "text": "Horror Minecraft mod with features beyond the game.", "tags": ["Java"], "year": "2025" }
+      ]
+    },
+    "archive": {
+      "title": "ARCHIVE",
+      "text": "Here you can find all my projects available for download. Some of them may no longer be available elsewhere.",
+      "btn": "See"
+    },
     "archivePage": {
-      "title": "Archive",
+      "title": "ARCHIVE",
       "desc": "Here you can find all the mods, apps, games, and other projects I have created. Some of them may no longer be available on other websites.",
       "back": "← Back",
       "projects": {
@@ -75,6 +106,11 @@
         "daysofdestiny": "The new worlds look like someone has been there before... But who?",
         "maslackitrakt": "A resource pack created by Kaki_karol, published on CurseForge by me. Posted here due to archiving and deletion on CurseForge. Original description: A comprehensive, interesting resource pack that adds iconic content from Tidzimi's streams and beyond!"
       }
+    },
+    "contact": {
+      "title": "CONTACT",
+      "text": "If you want to order a project related to programming or video editing, send me an email and we'll see if I can meet your expectations!",
+      "email": "Email: dlafuzji@gmail.com"
     },
     "footer": "© 2025 Fuzja Jadrowa. All rights reserved."
   }
