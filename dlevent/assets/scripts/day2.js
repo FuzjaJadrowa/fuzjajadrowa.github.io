@@ -14,11 +14,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+const STORAGE_KEY = 'dlevent_day2_state';
+
 let targetAngle = 0;
 let attempts = 0;
 const MAX_ATTEMPTS = 4;
 let isGameOver = false;
 let sessionCount = 1;
+let historyGuesses = [];
 
 let nick;
 let canvas, ctx;
@@ -58,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function start() {
     const access = await checkAccess();
     if (access) {
-        initGame();
+        loadGameState();
     }
 }
 
@@ -102,10 +105,62 @@ function showBlocker(title, msg) {
     }
 }
 
+function saveGameState() {
+    const state = {
+        targetAngle,
+        attempts,
+        historyGuesses,
+        sessionCount,
+        isGameOver
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadGameState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const state = JSON.parse(saved);
+        targetAngle = state.targetAngle;
+        attempts = state.attempts;
+        historyGuesses = state.historyGuesses || [];
+        sessionCount = state.sessionCount || 1;
+        isGameOver = state.isGameOver;
+
+        guessInput.value = '';
+        if(historyBody) historyBody.innerHTML = '';
+
+        attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
+
+        if (historyGuesses.length > 0) {
+            drawGame(historyGuesses[historyGuesses.length - 1]);
+        } else {
+            drawGame();
+        }
+
+        historyGuesses.forEach(g => addHistoryRow(g, targetAngle));
+
+        if (isGameOver) {
+            guessInput.disabled = true;
+            submitBtn.disabled = true;
+            if (historyGuesses[historyGuesses.length - 1] === targetAngle) {
+                messageEl.textContent = `PERFEKCYJNIE! (Odświeżono)`;
+                messageEl.style.color = "#00ff41";
+            } else {
+                messageEl.textContent = `KONIEC! Kąt to: ${targetAngle}°`;
+                messageEl.style.color = "#ff3333";
+                restartBtn.style.display = 'block';
+            }
+        }
+    } else {
+        initGame();
+    }
+}
+
 function initGame() {
     targetAngle = Math.floor(Math.random() * 340) + 10;
     attempts = 0;
     isGameOver = false;
+    historyGuesses = [];
 
     guessInput.value = '';
     guessInput.disabled = false;
@@ -117,9 +172,10 @@ function initGame() {
     if(historyBody) historyBody.innerHTML = '';
 
     drawGame();
+    saveGameState();
 }
 
-function drawGame() {
+function drawGame(userGuessAngle) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const cx = canvas.width / 2;
@@ -205,6 +261,7 @@ function handleGuess() {
     if (guess > 360) guess = 360;
 
     attempts++;
+    historyGuesses.push(guess);
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
 
     let diff = Math.abs(targetAngle - guess);
@@ -237,6 +294,7 @@ function handleGuess() {
             guessInput.focus();
         }
     }
+    saveGameState();
 }
 
 async function saveWin() {
@@ -246,7 +304,12 @@ async function saveWin() {
     const releaseDate = new Date(2025, 11, 2);
     const isReleaseDay = (today.getDate() === releaseDate.getDate() && today.getMonth() === releaseDate.getMonth() && today.getFullYear() === releaseDate.getFullYear());
 
-    let pointsEarned = isReleaseDay ? (sessionCount === 1 ? 10 : (sessionCount === 2 ? 8 : 6)) : 5;
+    let pointsEarned = 5;
+    if (isReleaseDay) {
+        if (sessionCount === 1) pointsEarned = 10;
+        else if (sessionCount === 2) pointsEarned = 8;
+        else pointsEarned = 6;
+    }
 
     const userRef = ref(db, 'users/' + nick);
     const snapshot = await get(userRef);
@@ -272,4 +335,5 @@ async function saveWin() {
             showBlocker("UKOŃCZONE", "Zadanie już zaliczone wcześniej.");
         }
     }
+    saveGameState();
 }

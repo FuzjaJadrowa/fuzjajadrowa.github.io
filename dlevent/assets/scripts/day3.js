@@ -27,8 +27,9 @@ const SONGS_DB = [
     { id: 10, artist: "Bobby Helms", title: "Jingle Bell Rock", file: "/dlevent/assets/audio/10.mp3" }
 ];
 
-let TARGET_SONG = SONGS_DB[Math.floor(Math.random() * SONGS_DB.length)];
+const STORAGE_KEY = 'dlevent_day3_state';
 
+let TARGET_SONG;
 const STEPS = [
     { time: 0.5, width: 6 },
     { time: 1.0, width: 6 },
@@ -40,10 +41,11 @@ const STEPS = [
 
 let currentStep = 0;
 let isPlaying = false;
-let audio = new Audio(TARGET_SONG.file);
+let audio = new Audio();
 let selectedSong = null;
 let isGameOver = false;
 let sessionCount = 1;
+let historyGuesses = [];
 
 let nick;
 let playBtn, progressFill, progressContainer, searchInput, searchResults, skipBtn, submitBtn, messageEl, restartBtn, guessesList;
@@ -96,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function start() {
     const access = await checkAccess();
     if (access) {
+        loadGameState();
     }
 }
 
@@ -137,6 +140,58 @@ function showBlocker(title, msg) {
     }
 }
 
+function saveGameState() {
+    const state = {
+        targetSongId: TARGET_SONG.id,
+        currentStep,
+        historyGuesses,
+        sessionCount,
+        isGameOver
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadGameState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const state = JSON.parse(saved);
+        TARGET_SONG = SONGS_DB.find(s => s.id === state.targetSongId);
+        if (!TARGET_SONG) { resetGame(); return; }
+
+        audio.src = TARGET_SONG.file;
+        currentStep = state.currentStep;
+        historyGuesses = state.historyGuesses || [];
+        sessionCount = state.sessionCount || 1;
+        isGameOver = state.isGameOver;
+
+        historyGuesses.forEach((g, i) => {
+            const boxes = guessesList.children;
+            const box = boxes[i];
+            box.textContent = g.text;
+            box.classList.add(g.status);
+        });
+
+        if (isGameOver) {
+            submitBtn.disabled = true;
+            skipBtn.disabled = true;
+            progressFill.style.width = '100%';
+
+            const last = historyGuesses[historyGuesses.length-1];
+            if (last && last.status === 'correct') {
+                messageEl.textContent = "GRATULACJE!";
+            } else {
+                messageEl.textContent = `KONIEC! To było: ${TARGET_SONG.artist} - ${TARGET_SONG.title}`;
+                messageEl.style.color = "#ff3333";
+                restartBtn.style.display = 'block';
+            }
+        } else {
+            messageEl.textContent = `Odblokowano ${STEPS[currentStep].time} sekundy!`;
+        }
+    } else {
+        resetGame();
+    }
+}
+
 function initUI() {
     progressContainer.innerHTML = '<div class="progress-fill" id="progress-fill"></div>';
 
@@ -157,6 +212,7 @@ function resetGame() {
     currentStep = 0;
     isGameOver = false;
     selectedSong = null;
+    historyGuesses = [];
     searchInput.value = '';
     searchInput.disabled = false;
     submitBtn.disabled = false;
@@ -168,9 +224,11 @@ function resetGame() {
     for(let box of boxes) {
         box.className = 'guess-box';
         box.textContent = '';
+        box.className = 'guess-box';
     }
 
     stopAudio();
+    saveGameState();
 }
 
 function togglePlay() {
@@ -182,9 +240,11 @@ function togglePlay() {
 }
 
 function playAudio() {
-    if(isGameOver) return;
+    if(isGameOver && currentStep >= STEPS.length - 1) {
+    }
+    if (isGameOver && historyGuesses.length > 0 && historyGuesses[historyGuesses.length-1].status !== 'correct' && currentStep < 5) return;
 
-    const maxDuration = STEPS[currentStep].time;
+    const maxDuration = STEPS[Math.min(currentStep, 5)].time;
 
     audio.play().catch(error => {
         console.error("Błąd odtwarzania:", error);
@@ -199,7 +259,7 @@ function playAudio() {
     progressFill.style.transition = `width ${maxDuration}s linear`;
 
     let totalWidth = 0;
-    for(let i=0; i<=currentStep; i++) totalWidth += STEPS[i].width;
+    for(let i=0; i<=Math.min(currentStep, 5); i++) totalWidth += STEPS[i].width;
 
     progressFill.style.width = totalWidth + '%';
 
@@ -290,6 +350,8 @@ function handleGuess() {
 }
 
 function recordAttempt(text, status) {
+    historyGuesses.push({text, status});
+
     const boxes = guessesList.children;
     const box = boxes[currentStep];
 
@@ -302,12 +364,15 @@ function recordAttempt(text, status) {
     } else {
         loseGame();
     }
+    saveGameState();
 }
 
 function winGame() {
     const boxes = guessesList.children;
     boxes[currentStep].textContent = `${TARGET_SONG.artist} - ${TARGET_SONG.title}`;
     boxes[currentStep].classList.add('correct');
+
+    historyGuesses.push({text: `${TARGET_SONG.artist} - ${TARGET_SONG.title}`, status: 'correct'});
 
     isGameOver = true;
     messageEl.textContent = "GRATULACJE!";
@@ -317,6 +382,7 @@ function winGame() {
     skipBtn.disabled = true;
 
     saveWin();
+    saveGameState();
 }
 
 function loseGame() {
@@ -324,6 +390,7 @@ function loseGame() {
     messageEl.textContent = `KONIEC! To było: ${TARGET_SONG.artist} - ${TARGET_SONG.title}`;
     messageEl.style.color = "#ff3333";
     restartBtn.style.display = 'block';
+    saveGameState();
 }
 
 async function saveWin() {

@@ -14,9 +14,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+const STORAGE_KEY = 'dlevent_day5_state';
+
 const ROWS = 16;
 const COLS = 16;
-const NORMAL_MINES_COUNT = 20;
+const NORMAL_MINES_COUNT = 40;
 const DOUBLE_MINES_COUNT = 1;
 
 let grid = [];
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         attempts++;
         sessionCount++;
         initGame();
+        saveGameState();
     });
 
     start();
@@ -58,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function start() {
     const access = await checkAccess();
     if (access) {
-        initGame();
+        loadGameState();
     }
 }
 
@@ -80,7 +83,7 @@ async function checkAccess() {
         if (snapshot.exists()) {
             const data = snapshot.val();
             if (data.completedDays && data.completedDays.includes(5)) {
-                showBlocker("UKOŃCZONE", "Ta gra została już ukończona!");
+                showBlocker("UKOŃCZONE", "Zadanie już wykonane!");
                 return false;
             }
         }
@@ -98,6 +101,46 @@ function showBlocker(title, msg) {
     }
 }
 
+function saveGameState() {
+    const state = {
+        grid,
+        flagsLeft,
+        doubleFlagsLeft,
+        gameOver,
+        attempts,
+        sessionCount,
+        firstClick
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadGameState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const state = JSON.parse(saved);
+        grid = state.grid;
+        flagsLeft = state.flagsLeft;
+        doubleFlagsLeft = state.doubleFlagsLeft;
+        gameOver = state.gameOver;
+        attempts = state.attempts;
+        sessionCount = state.sessionCount || 1;
+        firstClick = state.firstClick;
+
+        updateUI();
+        renderGrid();
+
+        attemptsDisplay.textContent = `Próby: ${attempts}`;
+
+        if (gameOver) {
+            messageEl.textContent = "KONIEC GRY! (Odświeżono)";
+            messageEl.style.color = "#ff3333";
+            restartBtn.style.display = 'block';
+        }
+    } else {
+        initGame();
+    }
+}
+
 function initGame() {
     gameOver = false;
     firstClick = true;
@@ -111,6 +154,7 @@ function initGame() {
 
     createEmptyGrid();
     renderGrid();
+    saveGameState();
 }
 
 function createEmptyGrid() {
@@ -245,6 +289,7 @@ function handleLeftClick(r, c) {
         checkWin();
     }
     renderGrid();
+    saveGameState();
 }
 
 function revealCell(r, c) {
@@ -292,6 +337,7 @@ function handleRightClick(r, c) {
     updateUI();
     renderGrid();
     checkWin();
+    saveGameState();
 }
 
 function revealAllMines() {
@@ -303,7 +349,6 @@ function revealAllMines() {
 }
 
 function checkWin() {
-
     let safeRevealed = 0;
     const totalSafe = (ROWS * COLS) - (NORMAL_MINES_COUNT + DOUBLE_MINES_COUNT);
     let doubleMineFlaggedCorrectly = false;

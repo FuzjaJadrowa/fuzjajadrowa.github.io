@@ -38,11 +38,16 @@
 
     <div id="login-modal" class="modal">
         <div class="modal-content">
-            <h2>Witaj w DLEVENT</h2>
-            <p>Podaj swój nick, aby zapisać wynik.</p>
-            <input type="text" id="nickname-input" placeholder="Twój Nick..." maxlength="15" autocomplete="off">
+            <h2 id="modal-title">LOGOWANIE</h2>
+            <p id="modal-desc">Wpisz nick i hasło, aby kontynuować.</p>
+
+            <input type="text" id="nickname-input" class="modal-input" placeholder="Twój Nick" maxlength="12" autocomplete="off">
+            <input type="password" id="password-input" class="modal-input" placeholder="Hasło" maxlength="20">
+
             <p id="modal-error" class="error-msg"></p>
-            <button id="start-btn">DOŁĄCZ DO GRY</button>
+
+            <button id="switch-mode-btn" class="modal-btn-secondary">Stwórz nowe konto</button>
+            <button id="main-action-btn" class="modal-btn-primary">ZALOGUJ</button>
         </div>
     </div>
     <footer>

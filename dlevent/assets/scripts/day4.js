@@ -14,6 +14,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+const STORAGE_KEY = 'dlevent_day4_state';
+
 let ALL_COUNTRIES = [];
 let TARGET_COUNTRY = null;
 
@@ -21,10 +23,8 @@ const MAX_ATTEMPTS = 6;
 let attempts = 0;
 let isGameOver = false;
 let sessionCount = 1;
-
-let revealedMask = null;
-
-let targetPixelData = null;
+let revealedColors = new Set();
+let historyGuesses = [];
 
 let nick;
 let canvas, ctx;
@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas = document.getElementById('flag-canvas');
     ctx = canvas.getContext('2d', { willReadFrequently: true });
-
     searchInput = document.getElementById('flag-search-input');
     searchResults = document.getElementById('flag-search-results');
     historyBody = document.getElementById('flag-history-body');
@@ -82,15 +81,15 @@ async function fetchAllCountries() {
         });
         ALL_COUNTRIES.sort((a, b) => a.name.localeCompare(b.name));
     } catch (e) {
-        console.error("Błąd API:", e);
-        messageEl.textContent = "Błąd ładowania flag!";
+        console.error("Błąd pobierania krajów:", e);
+        messageEl.textContent = "Błąd API flag!";
     }
 }
 
 async function start() {
     const access = await checkAccess();
     if (access) {
-        prepareNewRound();
+        loadGameState();
     }
 }
 
@@ -112,7 +111,7 @@ async function checkAccess() {
         if (snapshot.exists()) {
             const data = snapshot.val();
             if (data.completedDays && data.completedDays.includes(4)) {
-                showBlocker("UKOŃCZONE", "Ta gra została już ukończona!");
+                showBlocker("UKOŃCZONE", "Zadanie już wykonane!");
                 return false;
             }
         }
@@ -130,36 +129,134 @@ function showBlocker(title, msg) {
     }
 }
 
+function saveGameState() {
+    const state = {
+        targetCode: TARGET_COUNTRY ? TARGET_COUNTRY.code : null,
+        targetName: TARGET_COUNTRY ? TARGET_COUNTRY.name : null,
+        targetColors: TARGET_COUNTRY ? TARGET_COUNTRY.colors : null,
+        attempts,
+        historyGuesses,
+        revealedColors: Array.from(revealedColors),
+        sessionCount,
+        isGameOver
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadGameState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const state = JSON.parse(saved);
+        sessionCount = state.sessionCount || 1;
+
+        if (state.targetCode) {
+            TARGET_COUNTRY = {
+                name: state.targetName,
+                code: state.targetCode,
+                colors: state.targetColors
+            };
+
+            attempts = state.attempts;
+            historyGuesses = state.historyGuesses || [];
+            revealedColors = new Set(state.revealedColors || []);
+            isGameOver = state.isGameOver;
+
+            targetImage.src = `https://flagcdn.com/w640/${TARGET_COUNTRY.code}.png`;
+            targetImage.onload = () => {
+                initGameUI();
+
+                historyGuesses.forEach(g => {
+                    updateHistoryTable({name: g.name, code: g.code}, g.percent);
+                });
+
+                if (isGameOver) {
+                    searchInput.disabled = true;
+                    if (historyGuesses.length > 0 && historyGuesses[historyGuesses.length-1].code === TARGET_COUNTRY.code) {
+                        messageEl.textContent = "GRATULACJE! (Odświeżono)";
+                    } else {
+                        messageEl.textContent = `KONIEC! To: ${TARGET_COUNTRY.name.toUpperCase()}`;
+                        messageEl.style.color = "#ff3333";
+                        restartBtn.style.display = 'block';
+                    }
+                    TARGET_COUNTRY.colors.forEach(c => revealedColors.add(`${c.r},${c.g},${c.b}`));
+                    drawCanvas();
+                }
+            };
+        } else {
+            prepareNewRound();
+        }
+    } else {
+        prepareNewRound();
+    }
+}
+
 function prepareNewRound() {
     if (ALL_COUNTRIES.length === 0) return;
 
     const randomCountry = ALL_COUNTRIES[Math.floor(Math.random() * ALL_COUNTRIES.length)];
-    TARGET_COUNTRY = randomCountry;
-
     targetImage.src = `https://flagcdn.com/w640/${randomCountry.code}.png`;
 
-    messageEl.textContent = "Przygotowywanie flagi...";
+    messageEl.textContent = "Analiza flagi...";
     searchInput.disabled = true;
 
     targetImage.onload = () => {
-        const totalPixels = canvas.width * canvas.height;
-        revealedMask = new Uint8Array(totalPixels).fill(0);
+        const extractedColors = extractColorsFromImage(targetImage);
 
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-        tempCtx.drawImage(targetImage, 0, 0, canvas.width, canvas.height);
-        targetPixelData = tempCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+        TARGET_COUNTRY = {
+            name: randomCountry.name,
+            code: randomCountry.code,
+            colors: extractedColors
+        };
 
         messageEl.textContent = "";
+
+        attempts = 0;
+        isGameOver = false;
+        revealedColors.clear();
+        historyGuesses = [];
+
         initGameUI();
+        saveGameState();
     };
 }
 
+function extractColorsFromImage(img) {
+    const c = document.createElement('canvas');
+    const ctx = c.getContext('2d');
+    c.width = 100;
+    c.height = 100 * (img.height / img.width);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+
+    const imageData = ctx.getImageData(0, 0, c.width, c.height).data;
+    const colorCounts = {};
+    const totalPixels = imageData.length / 4;
+
+    for (let i = 0; i < imageData.length; i += 4) {
+        const r = imageData[i];
+        const g = imageData[i + 1];
+        const b = imageData[i + 2];
+        const a = imageData[i + 3];
+
+        if (a < 128) continue;
+
+        const key = `${Math.round(r/30)*30},${Math.round(g/30)*30},${Math.round(b/30)*30}`;
+        if (!colorCounts[key]) colorCounts[key] = { count: 0, r, g, b };
+        colorCounts[key].count++;
+    }
+
+    const threshold = totalPixels * 0.02;
+    const palette = [];
+
+    for (const key in colorCounts) {
+        if (colorCounts[key].count > threshold) {
+            const {r, g, b} = colorCounts[key];
+            palette.push({r, g, b});
+        }
+    }
+    return palette;
+}
+
 function initGameUI() {
-    attempts = 0;
-    isGameOver = false;
     searchInput.value = '';
     searchInput.disabled = false;
     restartBtn.style.display = 'none';
@@ -173,20 +270,47 @@ function drawCanvas() {
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const canvasImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = canvasImageData.data;
+    if (revealedColors.size === 0) return;
 
-    for (let i = 0; i < revealedMask.length; i++) {
-        if (revealedMask[i] === 1) {
-            const targetIndex = i * 4;
-            data[targetIndex] = targetPixelData[targetIndex];
-            data[targetIndex + 1] = targetPixelData[targetIndex + 1];
-            data[targetIndex + 2] = targetPixelData[targetIndex + 2];
-            data[targetIndex + 3] = 255;
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+    tempCtx.drawImage(targetImage, 0, 0, canvas.width, canvas.height);
+
+    const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+
+        if (a < 50) continue;
+
+        let closestColor = null;
+        let minDist = Infinity;
+
+        for (const paletteColor of TARGET_COUNTRY.colors) {
+            const dist = colorDistance(r, g, b, paletteColor.r, paletteColor.g, paletteColor.b);
+            if (dist < minDist) {
+                minDist = dist;
+                closestColor = paletteColor;
+            }
+        }
+
+        if (closestColor) {
+            const colorKey = `${closestColor.r},${closestColor.g},${closestColor.b}`;
+
+            if (!revealedColors.has(colorKey)) {
+                data[i] = 0;
+                data[i+1] = 0;
+                data[i+2] = 0;
+            }
         }
     }
-
-    ctx.putImageData(canvasImageData, 0, 0);
+    ctx.putImageData(imageData, 0, 0);
 }
 
 function colorDistance(r1, g1, b1, r2, g2, b2) {
@@ -224,79 +348,69 @@ function prepareGuess(country) {
     searchInput.value = '';
 
     if (country.code === TARGET_COUNTRY.code) {
-        handleWin(country);
+        handleGuess(country, TARGET_COUNTRY.colors);
         return;
     }
 
-    const guessImg = new Image();
-    guessImg.crossOrigin = "Anonymous";
-    guessImg.src = `https://flagcdn.com/w640/${country.code}.png`;
-
-    guessImg.onload = () => {
-        processGuess(country, guessImg);
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = `https://flagcdn.com/w160/${country.code}.png`;
+    img.onload = () => {
+        const colors = extractColorsFromImage(img);
+        handleGuess(country, colors);
     };
 }
 
-function processGuess(country, guessImg) {
+function handleGuess(country, guessColors) {
     if (isGameOver) return;
 
     attempts++;
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
 
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-    tempCtx.drawImage(guessImg, 0, 0, canvas.width, canvas.height);
+    let matchedInThisGuess = 0;
 
-    const guessData = tempCtx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-    let matchedPixelsInThisGuess = 0;
-    const totalPixels = canvas.width * canvas.height;
-
-    for (let i = 0; i < totalPixels; i++) {
-        const idx = i * 4;
-
-        const tr = targetPixelData[idx];
-        const tg = targetPixelData[idx + 1];
-        const tb = targetPixelData[idx + 2];
-        const ta = targetPixelData[idx + 3];
-
-        const gr = guessData[idx];
-        const gg = guessData[idx + 1];
-        const gb = guessData[idx + 2];
-        const ga = guessData[idx + 3];
-
-        if (ta < 128 || ga < 128) continue;
-
-        if (colorDistance(tr, tg, tb, gr, gg, gb) < 60) {
-            if (revealedMask[i] === 0) {
+    guessColors.forEach(guessC => {
+        let matchFound = false;
+        for (const targetC of TARGET_COUNTRY.colors) {
+            if (colorDistance(guessC.r, guessC.g, guessC.b, targetC.r, targetC.g, targetC.b) < 60) {
+                const targetKey = `${targetC.r},${targetC.g},${targetC.b}`;
+                revealedColors.add(targetKey);
+                matchFound = true;
             }
-
-            revealedMask[i] = 1;
-
-            matchedPixelsInThisGuess++;
         }
+        if (matchFound) matchedInThisGuess++;
+    });
+
+    let targetColorsHit = 0;
+    TARGET_COUNTRY.colors.forEach(targetC => {
+        for (const guessC of guessColors) {
+            if (colorDistance(guessC.r, guessC.g, guessC.b, targetC.r, targetC.g, targetC.b) < 60) {
+                targetColorsHit++;
+                break;
+            }
+        }
+    });
+
+    let percent = 0;
+    if (TARGET_COUNTRY.colors.length > 0) {
+        percent = Math.round((targetColorsHit / TARGET_COUNTRY.colors.length) * 100);
     }
 
-    const percent = Math.round((matchedPixelsInThisGuess / totalPixels) * 100);
+    historyGuesses.push({
+        name: country.name,
+        code: country.code,
+        percent: percent
+    });
 
     drawCanvas();
     updateHistoryTable(country, percent);
 
-    if (attempts >= MAX_ATTEMPTS) {
+    if (country.code === TARGET_COUNTRY.code) {
+        winGame();
+    } else if (attempts >= MAX_ATTEMPTS) {
         loseGame();
     }
-}
-
-function handleWin(country) {
-    attempts++;
-    attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
-
-    revealedMask.fill(1);
-    drawCanvas();
-    updateHistoryTable(country, 100);
-    winGame();
+    saveGameState();
 }
 
 function renderHistoryTable() {
@@ -326,6 +440,9 @@ function winGame() {
     isGameOver = true;
     messageEl.textContent = "GRATULACJE!";
     searchInput.disabled = true;
+
+    TARGET_COUNTRY.colors.forEach(c => revealedColors.add(`${c.r},${c.g},${c.b}`));
+    drawCanvas();
     saveWin();
 }
 
@@ -336,7 +453,7 @@ function loseGame() {
     searchInput.disabled = true;
     restartBtn.style.display = 'block';
 
-    revealedMask.fill(1);
+    TARGET_COUNTRY.colors.forEach(c => revealedColors.add(`${c.r},${c.g},${c.b}`));
     drawCanvas();
 }
 
