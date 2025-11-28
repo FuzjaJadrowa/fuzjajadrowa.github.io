@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 DLEVENT - Dzień 4</title>
+    <link rel="stylesheet" href="../assets/stylesheets/styles.css">
+</head>
+<body>
+
+<div id="access-blocker">
+    <h1 id="blocker-title">BŁĄD</h1>
+    <p id="blocker-msg">Brak dostępu.</p>
+    <a href="../index.html"><button>WRÓĆ DO MENU</button></a>
+</div>
+
+<div class="container">
+    <header class="main-header">
+        <h1>🎄 DZIEŃ 4 - FLAGLE</h1>
+        <p>Zgadnij flagę! Odkrywaj kolory.</p>
+    </header>
+
+    <div class="flagle-container">
+        <div id="message-area" style="height: 25px; color: var(--primary-green); text-align: center; font-weight: bold;"></div>
+
+        <div class="flag-display-box">
+            <canvas id="flag-canvas" width="600" height="400"></canvas>
+        </div>
+
+        <div class="attempts-info" id="attempts-display">Próby: 0/6</div>
+
+        <div class="flag-search-container">
+            <input type="text" id="flag-search-input" placeholder="Wpisz nazwę kraju..." autocomplete="off">
+            <div id="flag-search-results"></div>
+        </div>
+
+        <table class="flag-history-table">
+            <tbody id="flag-history-body">
+            </tbody>
+        </table>
+
+        <button id="restart-btn">ZAGRAJ PONOWNIE ↻</button>
+
+        <a href="../index.html" class="home-btn" style="margin-top: 30px; display: inline-block;">← WRÓĆ DO KALENDARZA</a>
+    </div>
+</div>
+
+<script type="module" src="../assets/scripts/day4.js"></script>
+</body>
+</html>

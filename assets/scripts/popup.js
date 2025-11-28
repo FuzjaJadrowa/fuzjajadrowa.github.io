@@ -12,9 +12,21 @@ function showPopup(message, duration = 2000) {
 if (emailBtn) {
     emailBtn.addEventListener("click", () => {
         navigator.clipboard.writeText("dlafuzji@gmail.com").then(() => {
-            showPopup(translations[window.currentLang].popup.copied);
+            let msg = "Skopiowano email!";
+
+            if (typeof currentLang !== 'undefined' && currentLang === 'en' &&
+                typeof translations !== 'undefined' && translations && translations.popup) {
+                msg = translations.popup.copied;
+            }
+
+            showPopup(msg);
         }).catch(() => {
-            showPopup(translations[window.currentLang].popup.error, 2000);
+            let msg = "Błąd kopiowania!";
+            if (typeof currentLang !== 'undefined' && currentLang === 'en' &&
+                typeof translations !== 'undefined' && translations && translations.popup) {
+                msg = translations.popup.error;
+            }
+            showPopup(msg, 2000);
         });
     });
 }
