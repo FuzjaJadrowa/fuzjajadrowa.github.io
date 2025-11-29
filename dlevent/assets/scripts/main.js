@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, set, get, query, orderByChild, limitToLast, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app-check.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCy4pA-GPhj5Ul9nok4gDBDpCSoAfyzGA0",
@@ -10,6 +11,11 @@ const firebaseConfig = {
     messagingSenderId: "868572467780",
     appId: "1:868572467780:web:788d6f6f04b844253ba211"
 };
+
+const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6LfFWBssAAAAAIzB7v1dQfzBW-MLG9-cDk2RUqGD'),
+    isTokenAutoRefreshEnabled: true
+});
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
