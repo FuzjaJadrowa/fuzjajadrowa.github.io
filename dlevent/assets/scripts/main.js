@@ -64,14 +64,14 @@ function setMode(mode) {
 
     if (mode === 'login') {
         modalTitle.textContent = "LOGOWANIE";
-        modalDesc.textContent = "Wpisz nick i hasło.";
+        modalDesc.textContent = "Wpisz nick i hasło. Gdy masz konto sprzed migracji, wpisz swój nick i pozostaw pole hasła puste.";
         mainBtn.textContent = "ZALOGUJ";
         switchBtn.textContent = "Stwórz nowe konto";
         switchBtn.style.display = 'inline-block';
         nickInput.disabled = false;
     } else if (mode === 'register') {
         modalTitle.textContent = "Witaj w DLEVENT";
-        modalDesc.textContent = "Podaj nick i utwórz hasło, aby zapisać wynik.";
+        modalDesc.textContent = "Podaj nick i utwórz hasło, aby zapisać wynik. Pamiętaj aby nie korzystać z hasła do twoich prawdziwych kont!";
         mainBtn.textContent = "DOŁĄCZ DO GRY";
         switchBtn.textContent = "Mam już konto (Zaloguj)";
         switchBtn.style.display = 'inline-block';
