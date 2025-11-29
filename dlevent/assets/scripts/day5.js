@@ -12,12 +12,13 @@ const firebaseConfig = {
     appId: "1:868572467780:web:788d6f6f04b844253ba211"
 };
 
+const app = initializeApp(firebaseConfig);
+
 const appCheck = initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider('6LfFWBssAAAAAIzB7v1dQfzBW-MLG9-cDk2RUqGD'),
     isTokenAutoRefreshEnabled: true
 });
 
-const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const STORAGE_KEY = 'dlevent_day5_state';
