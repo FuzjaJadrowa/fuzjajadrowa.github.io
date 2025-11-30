@@ -13,12 +13,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const appCheck = initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider('6LfFWBssAAAAAIzB7v1dQfzBW-MLG9-cDk2RUqGD'),
     isTokenAutoRefreshEnabled: true
 });
-
 const db = getDatabase(app);
 
 const WORDS = [
@@ -308,7 +306,11 @@ async function checkWord() {
         if (guessArr[i] === secretArr[i]) {
             tile.classList.remove('active');
             tile.classList.add('correct');
-            if(key) key.classList.add('correct');
+
+            if(key) {
+                key.classList.remove('present');
+                key.classList.add('correct');
+            }
             secretArr[i] = null;
             guessArr[i] = null;
         }
@@ -325,11 +327,15 @@ async function checkWord() {
 
         if (indexInSecret > -1) {
             tile.classList.add('present');
-            if(key && !key.classList.contains('correct')) key.classList.add('present');
+            if(key && !key.classList.contains('correct')) {
+                key.classList.add('present');
+            }
             secretArr[indexInSecret] = null;
         } else {
             tile.classList.add('absent');
-            if(key) key.classList.add('absent');
+            if(key && !key.classList.contains('correct') && !key.classList.contains('present')) {
+                key.classList.add('absent');
+            }
         }
     }
 

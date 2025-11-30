@@ -13,12 +13,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const appCheck = initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider('6LfFWBssAAAAAIzB7v1dQfzBW-MLG9-cDk2RUqGD'),
     isTokenAutoRefreshEnabled: true
 });
-
 const db = getDatabase(app);
 
 const STORAGE_KEY = 'dlevent_day7_state';
@@ -129,7 +127,7 @@ async function checkAccess() {
         if (snapshot.exists()) {
             const data = snapshot.val();
             if (data.completedDays && data.completedDays.includes(7)) {
-                showBlocker("UKOŃCZONE", "Zadanie już wykonane!");
+                showBlocker("UKOŃCZONE", "Ta gra została już ukończona!");
                 return false;
             }
         }

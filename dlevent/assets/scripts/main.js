@@ -186,6 +186,8 @@ function renderGrid(completedDays = []) {
         if (isLocked) {
             btn.classList.add('locked');
             btn.disabled = true;
+        } else if (isCompleted) {
+            btn.disabled = true;
         } else {
             btn.addEventListener('click', () => {
                 window.location.href = `day/${i}.html`;
