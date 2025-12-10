@@ -19,27 +19,45 @@ const appCheck = initializeAppCheck(app, {
 });
 const db = getDatabase(app);
 
-const STORAGE_KEY = 'dlevent_day9_state';
+const STORAGE_KEY = 'dlevent_day13_state';
 
-let ELEMENTS_DB = [];
-let TARGET_ELEMENT = null;
+const EXTRA_ARTISTS = [
+    "Zdzisław Beksiński", "Stanisław Ignacy Witkiewicz", "Olga Boznańska", "Władysław Podkowiński",
+    "Aleksander Gierymski", "Józef Chełmoński", "Tadeusz Makowski", "Nikifor Krynicki",
+    "Henri Matisse", "Jackson Pollock", "Pierre-Auguste Renoir", "Paul Cézanne", "Marc Chagall",
+    "Edgar Degas", "Paul Gauguin", "Édouard Manet", "Tycjan", "Peter Paul Rubens", "El Greco",
+    "Albrecht Dürer", "Pieter Bruegel (starszy)", "William Blake", "J.M.W. Turner", "John Constable",
+    "Jean-Michel Basquiat", "Keith Haring", "Banksy", "Mary Cassatt", "Artemisia Gentileschi",
+    "Dante Gabriel Rossetti", "Roy Lichtenstein", "Piet Mondrian", "Joan Miró", "Egon Schiele",
+    "Amedeo Modigliani", "Henri de Toulouse-Lautrec", "Camille Pissarro", "Georges Braque",
+    "Francis Bacon", "Lucian Freud", "David Hockney", "Yayoi Kusama", "Ai Weiwei", "Marina Abramović",
+    "Auguste Rodin", "Donatello", "Gian Lorenzo Bernini", "Antonio Canova", "Winslow Homer"
+];
 
-const MAX_ATTEMPTS = 5;
+let ART_DB = [];
+let ALL_ARTISTS = [];
+let TARGET_ART = null;
+
+const ZOOM_LEVELS = [12, 8, 5, 3, 2, 1];
+const MAX_ATTEMPTS = 6;
+
 let attempts = 0;
 let isGameOver = false;
 let sessionCount = 1;
 let historyGuesses = [];
 
 let nick;
-let searchInput, searchResults, historyBody, messageEl, restartBtn, attemptsDisplay;
+let artImg, imgLoader, searchInput, searchResults, historyBody, messageEl, restartBtn, attemptsDisplay;
 let blocker, blockerTitle, blockerMsg;
 
 document.addEventListener('DOMContentLoaded', () => {
     nick = localStorage.getItem('dlevent_nickname');
 
-    searchInput = document.getElementById('element-search-input');
-    searchResults = document.getElementById('element-search-results');
-    historyBody = document.getElementById('elementle-history-body');
+    artImg = document.getElementById('artle-img');
+    imgLoader = document.getElementById('img-loader');
+    searchInput = document.getElementById('artle-search-input');
+    searchResults = document.getElementById('artle-search-results');
+    historyBody = document.getElementById('artle-history-body');
     messageEl = document.getElementById('message-area');
     restartBtn = document.getElementById('restart-btn');
     attemptsDisplay = document.getElementById('attempts-display');
@@ -48,9 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
     blockerTitle = document.getElementById('blocker-title');
     blockerMsg = document.getElementById('blocker-msg');
 
-    searchInput.addEventListener('input', (e) => filterElements(e.target.value));
+    searchInput.addEventListener('input', (e) => filterArtists(e.target.value));
+
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.elementle-search-box')) {
+        if (e.target !== searchInput && e.target !== searchResults) {
             searchResults.style.display = 'none';
         }
     });
@@ -61,18 +80,23 @@ document.addEventListener('DOMContentLoaded', () => {
         prepareNewRound();
     });
 
-    loadElementsConfig().then(() => {
+    loadConfig().then(() => {
         start();
     });
 });
 
-async function loadElementsConfig() {
+async function loadConfig() {
     try {
-        const res = await fetch('../assets/scripts/day9config.json');
-        ELEMENTS_DB = await res.json();
+        const res = await fetch('../assets/scripts/day13config.json');
+        ART_DB = await res.json();
+
+        const configArtists = ART_DB.map(item => item.artist);
+        const combined = new Set([...configArtists, ...EXTRA_ARTISTS]);
+        ALL_ARTISTS = Array.from(combined).sort((a, b) => a.localeCompare(b));
+
     } catch (e) {
-        console.error("Błąd ładowania configu:", e);
-        messageEl.textContent = "Błąd bazy pierwiastków!";
+        console.error("Błąd configu:", e);
+        messageEl.textContent = "Błąd bazy dzieł!";
     }
 }
 
@@ -84,13 +108,24 @@ async function start() {
 }
 
 function prepareNewRound() {
-    if (ELEMENTS_DB.length === 0) return;
+    if (ART_DB.length === 0) return;
 
-    TARGET_ELEMENT = ELEMENTS_DB[Math.floor(Math.random() * ELEMENTS_DB.length)];
+    let randomArt;
+    do {
+        randomArt = ART_DB[Math.floor(Math.random() * ART_DB.length)];
+    } while (TARGET_ART && randomArt.id === TARGET_ART.id && ART_DB.length > 1);
+
+    TARGET_ART = randomArt;
 
     attempts = 0;
     isGameOver = false;
     historyGuesses = [];
+
+    setupUI();
+    saveGameState();
+}
+
+function setupUI() {
     searchInput.value = '';
     searchInput.disabled = false;
     restartBtn.style.display = 'none';
@@ -98,35 +133,39 @@ function prepareNewRound() {
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
     historyBody.innerHTML = '';
 
-    for(let i=0; i<MAX_ATTEMPTS; i++) {
-        const row = document.createElement('tr');
-        row.className = 'elementle-row empty-row';
-        row.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
-        historyBody.appendChild(row);
-    }
+    imgLoader.style.display = 'block';
+    artImg.style.display = 'none';
+    artImg.src = TARGET_ART.img;
+    artImg.style.objectFit = 'cover';
 
-    saveGameState();
+    setZoom(ZOOM_LEVELS[0]);
+
+    artImg.onload = () => {
+        imgLoader.style.display = 'none';
+        artImg.style.display = 'block';
+    };
 }
 
-function filterElements(query) {
-    if (query.length < 1) {
+function setZoom(scale) {
+    artImg.style.transform = `scale(${scale})`;
+}
+
+function filterArtists(query) {
+    if (query.length < 2) {
         searchResults.style.display = 'none';
         return;
     }
     const lower = query.toLowerCase();
-    const matches = ELEMENTS_DB.filter(e =>
-        e.name.toLowerCase().includes(lower) ||
-        e.symbol.toLowerCase() === lower
-    );
+    const matches = ALL_ARTISTS.filter(artist => artist.toLowerCase().includes(lower));
 
     searchResults.innerHTML = '';
     if (matches.length > 0) {
         searchResults.style.display = 'block';
-        matches.slice(0, 10).forEach(e => {
+        matches.slice(0, 10).forEach(artist => {
             const div = document.createElement('div');
-            div.className = 'element-search-item';
-            div.innerHTML = `<span>${e.name}</span> <span class="element-symbol">${e.symbol}</span>`;
-            div.addEventListener('click', () => handleGuess(e));
+            div.className = 'artle-search-item';
+            div.textContent = artist;
+            div.addEventListener('click', () => handleGuess(artist));
             searchResults.appendChild(div);
         });
     } else {
@@ -134,61 +173,50 @@ function filterElements(query) {
     }
 }
 
-function handleGuess(element) {
+function handleGuess(artistName) {
     if (isGameOver) return;
     searchResults.style.display = 'none';
     searchInput.value = '';
 
-    if (historyGuesses.some(g => g.name === element.name)) {
-        messageEl.textContent = "Ten pierwiastek już był!";
+    if (historyGuesses.includes(artistName)) {
+        messageEl.textContent = "Już typowałeś tego artystę!";
         return;
     }
 
     attempts++;
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
+    historyGuesses.push(artistName);
 
-    const isTarget = element.name === TARGET_ELEMENT.name;
+    const isCorrect = artistName === TARGET_ART.artist;
 
-    const result = {
-        name: element.name,
-        symbol: element.symbol,
+    addHistoryRow(artistName, isCorrect);
 
-        matchType: element.type === TARGET_ELEMENT.type,
-        matchReact: element.reactivity === TARGET_ELEMENT.reactivity,
-        matchGroup: element.groupProp === TARGET_ELEMENT.groupProp,
-        matchUnique: isTarget,
-
-        valType: element.type,
-        valReact: element.reactivity,
-        valGroup: element.groupProp,
-        valUnique: element.unique
-    };
-
-    historyGuesses.push(result);
-    updateTable(result);
-
-    if (isTarget) {
+    if (isCorrect) {
         winGame();
-    } else if (attempts >= MAX_ATTEMPTS) {
-        loseGame();
+    } else {
+        if (attempts < MAX_ATTEMPTS) {
+            setZoom(ZOOM_LEVELS[attempts]);
+        }
+
+        if (attempts >= MAX_ATTEMPTS) {
+            loseGame();
+        }
     }
     saveGameState();
 }
 
-function updateTable(res) {
-    const rows = historyBody.children;
-    const currentRow = rows[attempts - 1];
+function addHistoryRow(name, isCorrect) {
+    const row = document.createElement('tr');
+    row.className = 'artle-row';
 
-    if (currentRow) {
-        currentRow.classList.remove('empty-row');
-        currentRow.innerHTML = `
-            <td><span class="periodic-tile">${res.symbol}</span>${res.name}</td>
-            <td class="${res.matchType ? 'ele-correct' : 'ele-wrong'}">${res.valType}</td>
-            <td class="${res.matchReact ? 'ele-correct' : 'ele-wrong'}">${res.valReact}</td>
-            <td class="${res.matchGroup ? 'ele-correct' : 'ele-wrong'}">${res.valGroup}</td>
-            <td class="${res.matchUnique ? 'ele-correct' : 'ele-wrong'}">${res.valUnique}</td>
-        `;
-    }
+    const icon = isCorrect ? '🎨' : '❌';
+    const styleClass = isCorrect ? 'status-correct' : 'status-wrong';
+
+    row.innerHTML = `
+        <td>${name}</td>
+        <td class="${styleClass}">${icon}</td>
+    `;
+    historyBody.prepend(row);
 }
 
 function winGame() {
@@ -196,21 +224,25 @@ function winGame() {
     messageEl.textContent = "GRATULACJE!";
     messageEl.style.color = "#00ff41";
     searchInput.disabled = true;
+    setZoom(1);
+    artImg.style.objectFit = 'contain';
     saveWin();
 }
 
 function loseGame() {
     isGameOver = true;
-    messageEl.textContent = `KONIEC! To był: ${TARGET_ELEMENT.name}`;
+    messageEl.textContent = `KONIEC! To: ${TARGET_ART.artist} - "${TARGET_ART.title}"`;
     messageEl.style.color = "#ff3333";
     searchInput.disabled = true;
     restartBtn.style.display = 'block';
+    setZoom(1);
+    artImg.style.objectFit = 'contain';
 }
 
 function saveGameState() {
     const state = {
         sessionCount,
-        targetName: TARGET_ELEMENT ? TARGET_ELEMENT.name : null,
+        artId: TARGET_ART ? TARGET_ART.id : null,
         attempts,
         historyGuesses,
         isGameOver
@@ -220,44 +252,40 @@ function saveGameState() {
 
 function loadGameState() {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    if (saved && ART_DB.length > 0) {
         const state = JSON.parse(saved);
         sessionCount = state.sessionCount || 1;
 
-        if (state.targetName && ELEMENTS_DB.length > 0) {
-            TARGET_ELEMENT = ELEMENTS_DB.find(e => e.name === state.targetName);
-            if (!TARGET_ELEMENT) { prepareNewRound(); return; }
+        if (state.artId) {
+            const found = ART_DB.find(a => a.id === state.artId);
+            if (!found) { prepareNewRound(); return; }
 
+            TARGET_ART = found;
             attempts = state.attempts;
             historyGuesses = state.historyGuesses || [];
             isGameOver = state.isGameOver;
 
-            attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
-            historyBody.innerHTML = '';
+            setupUI();
 
-            for(let i=0; i<MAX_ATTEMPTS; i++) {
-                const row = document.createElement('tr');
-                row.className = 'elementle-row empty-row';
-                row.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
-                historyBody.appendChild(row);
+            if (!isGameOver) {
+                setZoom(ZOOM_LEVELS[attempts]);
+            } else {
+                setZoom(1);
+                artImg.style.objectFit = 'contain';
             }
 
-            const savedAttempts = attempts;
-            attempts = 0;
-            historyGuesses.forEach(res => {
-                attempts++;
-                updateTable(res);
+            historyGuesses.forEach(guess => {
+                addHistoryRow(guess, guess === TARGET_ART.artist);
             });
-            attempts = savedAttempts;
 
             if (isGameOver) {
                 searchInput.disabled = true;
                 const last = historyGuesses[historyGuesses.length-1];
-                if (last && last.matchUnique) {
+                if (last === TARGET_ART.artist) {
                     messageEl.textContent = "GRATULACJE! (Odświeżono)";
                     messageEl.style.color = "#00ff41";
                 } else {
-                    messageEl.textContent = `KONIEC! To był: ${TARGET_ELEMENT.name}`;
+                    messageEl.textContent = `KONIEC! To: ${TARGET_ART.artist} - "${TARGET_ART.title}"`;
                     messageEl.style.color = "#ff3333";
                     restartBtn.style.display = 'block';
                 }
@@ -276,7 +304,7 @@ async function checkAccess() {
         return false;
     }
     const today = new Date();
-    const releaseDate = new Date(2025, 11, 9);
+    const releaseDate = new Date(2025, 11, 13);
 
     if (today < releaseDate) {
         showBlocker("NIE OSZUKUJ!", "To zadanie nie jest jeszcze dostępne.");
@@ -287,7 +315,7 @@ async function checkAccess() {
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
             const data = snapshot.val();
-            if (data.completedDays && data.completedDays.includes(9)) {
+            if (data.completedDays && data.completedDays.includes(13)) {
                 showBlocker("UKOŃCZONE", "Ta gra została już ukończona!");
                 return false;
             }
@@ -309,7 +337,7 @@ function showBlocker(title, msg) {
 async function saveWin() {
     if (!nick) return;
     const today = new Date();
-    const releaseDate = new Date(2025, 11, 9);
+    const releaseDate = new Date(2025, 11, 13);
     const isReleaseDay = (today.getDate() === releaseDate.getDate() && today.getMonth() === releaseDate.getMonth() && today.getFullYear() === releaseDate.getFullYear());
 
     let pointsEarned = 5;
@@ -324,8 +352,8 @@ async function saveWin() {
     if (snapshot.exists()) {
         const data = snapshot.val();
         let completedDays = data.completedDays || [];
-        if (!completedDays.includes(9)) {
-            completedDays.push(9);
+        if (!completedDays.includes(13)) {
+            completedDays.push(13);
             const newScore = (data.score || 0) + pointsEarned;
             await update(userRef, { score: newScore, completedDays: completedDays });
             messageEl.textContent += ` (+${pointsEarned} PKT)`;

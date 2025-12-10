@@ -19,10 +19,10 @@ const appCheck = initializeAppCheck(app, {
 });
 const db = getDatabase(app);
 
-const STORAGE_KEY = 'dlevent_day9_state';
+const STORAGE_KEY = 'dlevent_day11_state';
 
-let ELEMENTS_DB = [];
-let TARGET_ELEMENT = null;
+let LANG_DB = [];
+let TARGET_LANG = null;
 
 const MAX_ATTEMPTS = 5;
 let attempts = 0;
@@ -31,15 +31,16 @@ let sessionCount = 1;
 let historyGuesses = [];
 
 let nick;
-let searchInput, searchResults, historyBody, messageEl, restartBtn, attemptsDisplay;
+let codeDisplay, searchInput, searchResults, historyBody, messageEl, restartBtn, attemptsDisplay;
 let blocker, blockerTitle, blockerMsg;
 
 document.addEventListener('DOMContentLoaded', () => {
     nick = localStorage.getItem('dlevent_nickname');
 
-    searchInput = document.getElementById('element-search-input');
-    searchResults = document.getElementById('element-search-results');
-    historyBody = document.getElementById('elementle-history-body');
+    codeDisplay = document.getElementById('code-display');
+    searchInput = document.getElementById('codedle-search-input');
+    searchResults = document.getElementById('codedle-search-results');
+    historyBody = document.getElementById('codedle-history-body');
     messageEl = document.getElementById('message-area');
     restartBtn = document.getElementById('restart-btn');
     attemptsDisplay = document.getElementById('attempts-display');
@@ -48,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
     blockerTitle = document.getElementById('blocker-title');
     blockerMsg = document.getElementById('blocker-msg');
 
-    searchInput.addEventListener('input', (e) => filterElements(e.target.value));
+    searchInput.addEventListener('input', (e) => filterLanguages(e.target.value));
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.elementle-search-box')) {
+        if (!e.target.closest('.codedle-search-box')) {
             searchResults.style.display = 'none';
         }
     });
@@ -61,18 +62,18 @@ document.addEventListener('DOMContentLoaded', () => {
         prepareNewRound();
     });
 
-    loadElementsConfig().then(() => {
+    loadConfig().then(() => {
         start();
     });
 });
 
-async function loadElementsConfig() {
+async function loadConfig() {
     try {
-        const res = await fetch('../assets/scripts/day9config.json');
-        ELEMENTS_DB = await res.json();
+        const res = await fetch('../assets/scripts/day11config.json');
+        LANG_DB = await res.json();
     } catch (e) {
-        console.error("Błąd ładowania configu:", e);
-        messageEl.textContent = "Błąd bazy pierwiastków!";
+        console.error("Błąd configu:", e);
+        messageEl.textContent = "Błąd ładowania języków!";
     }
 }
 
@@ -84,9 +85,9 @@ async function start() {
 }
 
 function prepareNewRound() {
-    if (ELEMENTS_DB.length === 0) return;
+    if (LANG_DB.length === 0) return;
 
-    TARGET_ELEMENT = ELEMENTS_DB[Math.floor(Math.random() * ELEMENTS_DB.length)];
+    TARGET_LANG = LANG_DB[Math.floor(Math.random() * LANG_DB.length)];
 
     attempts = 0;
     isGameOver = false;
@@ -98,35 +99,38 @@ function prepareNewRound() {
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
     historyBody.innerHTML = '';
 
+    codeDisplay.textContent = TARGET_LANG.snippet;
+
     for(let i=0; i<MAX_ATTEMPTS; i++) {
-        const row = document.createElement('tr');
-        row.className = 'elementle-row empty-row';
-        row.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
-        historyBody.appendChild(row);
+        createEmptyRow();
     }
 
     saveGameState();
 }
 
-function filterElements(query) {
+function createEmptyRow() {
+    const row = document.createElement('tr');
+    row.className = 'codedle-row empty-row';
+    row.innerHTML = `<td></td><td></td><td></td><td></td>`;
+    historyBody.appendChild(row);
+}
+
+function filterLanguages(query) {
     if (query.length < 1) {
         searchResults.style.display = 'none';
         return;
     }
     const lower = query.toLowerCase();
-    const matches = ELEMENTS_DB.filter(e =>
-        e.name.toLowerCase().includes(lower) ||
-        e.symbol.toLowerCase() === lower
-    );
+    const matches = LANG_DB.filter(l => l.name.toLowerCase().includes(lower));
 
     searchResults.innerHTML = '';
     if (matches.length > 0) {
         searchResults.style.display = 'block';
-        matches.slice(0, 10).forEach(e => {
+        matches.slice(0, 10).forEach(l => {
             const div = document.createElement('div');
-            div.className = 'element-search-item';
-            div.innerHTML = `<span>${e.name}</span> <span class="element-symbol">${e.symbol}</span>`;
-            div.addEventListener('click', () => handleGuess(e));
+            div.className = 'codedle-search-item';
+            div.innerHTML = `<span>${l.name}</span>`;
+            div.addEventListener('click', () => handleGuess(l));
             searchResults.appendChild(div);
         });
     } else {
@@ -134,34 +138,33 @@ function filterElements(query) {
     }
 }
 
-function handleGuess(element) {
+function handleGuess(lang) {
     if (isGameOver) return;
     searchResults.style.display = 'none';
     searchInput.value = '';
 
-    if (historyGuesses.some(g => g.name === element.name)) {
-        messageEl.textContent = "Ten pierwiastek już był!";
+    if (historyGuesses.some(g => g.name === lang.name)) {
+        messageEl.textContent = "Ten język już był!";
         return;
     }
 
     attempts++;
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
 
-    const isTarget = element.name === TARGET_ELEMENT.name;
+    const isTarget = lang.name === TARGET_LANG.name;
 
     const result = {
-        name: element.name,
-        symbol: element.symbol,
+        name: lang.name,
 
-        matchType: element.type === TARGET_ELEMENT.type,
-        matchReact: element.reactivity === TARGET_ELEMENT.reactivity,
-        matchGroup: element.groupProp === TARGET_ELEMENT.groupProp,
-        matchUnique: isTarget,
+        valParadigm: lang.paradigm,
+        valTyping: lang.typing,
+        valYear: lang.year,
 
-        valType: element.type,
-        valReact: element.reactivity,
-        valGroup: element.groupProp,
-        valUnique: element.unique
+        matchParadigm: lang.paradigm === TARGET_LANG.paradigm,
+        matchTyping: lang.typing === TARGET_LANG.typing,
+
+        yearArrow: lang.year === TARGET_LANG.year ? '✅' : (lang.year < TARGET_LANG.year ? '⬆️' : '⬇️'),
+        matchYear: lang.year === TARGET_LANG.year
     };
 
     historyGuesses.push(result);
@@ -182,11 +185,10 @@ function updateTable(res) {
     if (currentRow) {
         currentRow.classList.remove('empty-row');
         currentRow.innerHTML = `
-            <td><span class="periodic-tile">${res.symbol}</span>${res.name}</td>
-            <td class="${res.matchType ? 'ele-correct' : 'ele-wrong'}">${res.valType}</td>
-            <td class="${res.matchReact ? 'ele-correct' : 'ele-wrong'}">${res.valReact}</td>
-            <td class="${res.matchGroup ? 'ele-correct' : 'ele-wrong'}">${res.valGroup}</td>
-            <td class="${res.matchUnique ? 'ele-correct' : 'ele-wrong'}">${res.valUnique}</td>
+            <td>${res.name}</td>
+            <td class="${res.matchParadigm ? 'code-correct' : 'code-wrong'}">${res.valParadigm}</td>
+            <td class="${res.matchTyping ? 'code-correct' : 'code-wrong'}">${res.valTyping}</td>
+            <td class="${res.matchYear ? 'code-correct' : 'code-wrong'}">${res.valYear} ${res.yearArrow}</td>
         `;
     }
 }
@@ -201,7 +203,7 @@ function winGame() {
 
 function loseGame() {
     isGameOver = true;
-    messageEl.textContent = `KONIEC! To był: ${TARGET_ELEMENT.name}`;
+    messageEl.textContent = `KONIEC! To był: ${TARGET_LANG.name}`;
     messageEl.style.color = "#ff3333";
     searchInput.disabled = true;
     restartBtn.style.display = 'block';
@@ -210,7 +212,7 @@ function loseGame() {
 function saveGameState() {
     const state = {
         sessionCount,
-        targetName: TARGET_ELEMENT ? TARGET_ELEMENT.name : null,
+        targetName: TARGET_LANG ? TARGET_LANG.name : null,
         attempts,
         historyGuesses,
         isGameOver
@@ -224,22 +226,20 @@ function loadGameState() {
         const state = JSON.parse(saved);
         sessionCount = state.sessionCount || 1;
 
-        if (state.targetName && ELEMENTS_DB.length > 0) {
-            TARGET_ELEMENT = ELEMENTS_DB.find(e => e.name === state.targetName);
-            if (!TARGET_ELEMENT) { prepareNewRound(); return; }
+        if (state.targetName && LANG_DB.length > 0) {
+            TARGET_LANG = LANG_DB.find(l => l.name === state.targetName);
+            if (!TARGET_LANG) { prepareNewRound(); return; }
 
             attempts = state.attempts;
             historyGuesses = state.historyGuesses || [];
             isGameOver = state.isGameOver;
 
+            codeDisplay.textContent = TARGET_LANG.snippet;
             attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
             historyBody.innerHTML = '';
 
             for(let i=0; i<MAX_ATTEMPTS; i++) {
-                const row = document.createElement('tr');
-                row.className = 'elementle-row empty-row';
-                row.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
-                historyBody.appendChild(row);
+                createEmptyRow();
             }
 
             const savedAttempts = attempts;
@@ -253,11 +253,11 @@ function loadGameState() {
             if (isGameOver) {
                 searchInput.disabled = true;
                 const last = historyGuesses[historyGuesses.length-1];
-                if (last && last.matchUnique) {
+                if (last && last.name === TARGET_LANG.name) {
                     messageEl.textContent = "GRATULACJE! (Odświeżono)";
                     messageEl.style.color = "#00ff41";
                 } else {
-                    messageEl.textContent = `KONIEC! To był: ${TARGET_ELEMENT.name}`;
+                    messageEl.textContent = `KONIEC! To był: ${TARGET_LANG.name}`;
                     messageEl.style.color = "#ff3333";
                     restartBtn.style.display = 'block';
                 }
@@ -276,7 +276,7 @@ async function checkAccess() {
         return false;
     }
     const today = new Date();
-    const releaseDate = new Date(2025, 11, 9);
+    const releaseDate = new Date(2025, 11, 11);
 
     if (today < releaseDate) {
         showBlocker("NIE OSZUKUJ!", "To zadanie nie jest jeszcze dostępne.");
@@ -287,7 +287,7 @@ async function checkAccess() {
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
             const data = snapshot.val();
-            if (data.completedDays && data.completedDays.includes(9)) {
+            if (data.completedDays && data.completedDays.includes(11)) {
                 showBlocker("UKOŃCZONE", "Ta gra została już ukończona!");
                 return false;
             }
@@ -309,7 +309,7 @@ function showBlocker(title, msg) {
 async function saveWin() {
     if (!nick) return;
     const today = new Date();
-    const releaseDate = new Date(2025, 11, 9);
+    const releaseDate = new Date(2025, 11, 11);
     const isReleaseDay = (today.getDate() === releaseDate.getDate() && today.getMonth() === releaseDate.getMonth() && today.getFullYear() === releaseDate.getFullYear());
 
     let pointsEarned = 5;
@@ -324,8 +324,8 @@ async function saveWin() {
     if (snapshot.exists()) {
         const data = snapshot.val();
         let completedDays = data.completedDays || [];
-        if (!completedDays.includes(9)) {
-            completedDays.push(9);
+        if (!completedDays.includes(11)) {
+            completedDays.push(11);
             const newScore = (data.score || 0) + pointsEarned;
             await update(userRef, { score: newScore, completedDays: completedDays });
             messageEl.textContent += ` (+${pointsEarned} PKT)`;

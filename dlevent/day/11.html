@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 DLEVENT - Dzień 11</title>
+    <link rel="stylesheet" href="../assets/stylesheets/styles.css">
+</head>
+<body>
+
+<div id="access-blocker">
+    <h1 id="blocker-title">BŁĄD</h1>
+    <p id="blocker-msg">Brak dostępu.</p>
+    <a href="../index.html"><button>WRÓĆ DO MENU</button></a>
+</div>
+
+<div class="container">
+    <header class="main-header">
+        <h1>🎄 DZIEŃ 11 - CODEDLE</h1>
+        <p>Zgadnij jaki to język programowania!</p>
+    </header>
+
+    <div class="codedle-container">
+        <div id="message-area" style="height: 25px; color: var(--primary-green); text-align: center; font-weight: bold;"></div>
+
+        <div class="code-snippet-box">
+            <code id="code-display">Ładowanie kodu...</code>
+        </div>
+
+        <div class="codedle-search-box">
+            <input type="text" id="codedle-search-input" placeholder="Wpisz nazwę języka..." autocomplete="off">
+            <div id="codedle-search-results"></div>
+        </div>
+
+        <div style="text-align: center; color: #888;" id="attempts-display">Próby: 0/5</div>
+
+        <div class="table-container">
+            <table class="codedle-table">
+                <thead>
+                <tr>
+                    <th width="25%">Język</th>
+                    <th width="25%">Paradygmat</th>
+                    <th width="25%">Typowanie</th>
+                    <th width="25%">Rok</th>
+                </tr>
+                </thead>
+                <tbody id="codedle-history-body">
+                </tbody>
+            </table>
+        </div>
+
+        <button id="restart-btn">ZAGRAJ PONOWNIE ↻</button>
+
+        <a href="../index.html" class="home-btn" style="margin-top: 30px; display: inline-block;">← WRÓĆ DO KALENDARZA</a>
+    </div>
+</div>
+
+<script type="module" src="../assets/scripts/day11.js"></script>
+</body>
+</html>

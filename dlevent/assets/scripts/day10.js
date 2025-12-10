@@ -19,7 +19,7 @@ const appCheck = initializeAppCheck(app, {
 });
 const db = getDatabase(app);
 
-const STORAGE_KEY = 'dlevent_day10_state_numberle';
+const STORAGE_KEY = 'dlevent_day10_state';
 
 const MAX_ATTEMPTS = 6;
 const EQUATION_LENGTH = 8;

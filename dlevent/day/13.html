@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 DLEVENT - Dzień 13</title>
+    <link rel="stylesheet" href="../assets/stylesheets/styles.css">
+</head>
+<body>
+
+<div id="access-blocker">
+    <h1 id="blocker-title">BŁĄD</h1>
+    <p id="blocker-msg">Brak dostępu.</p>
+    <a href="../index.html"><button>WRÓĆ DO MENU</button></a>
+</div>
+
+<div class="container">
+    <header class="main-header">
+        <h1>🎄 DZIEŃ 13 - ARTLE</h1>
+        <p>Zgadnij kto namalował ten obraz!</p>
+    </header>
+
+    <div class="artle-container">
+        <div id="message-area" style="height: 25px; color: var(--primary-green); text-align: center; font-weight: bold;"></div>
+
+        <div class="artle-image-frame">
+            <img id="artle-img" class="artle-img" src="" alt="Dzieło sztuki" style="display:none;">
+            <div id="img-loader" style="color: #888;">Wczytywanie dzieła...</div>
+        </div>
+
+        <div style="text-align: center; color: #888;" id="attempts-display">Próby: 0/5</div>
+
+        <div class="artle-input-group">
+            <input type="text" id="artle-search-input" placeholder="Wpisz nazwisko malarza..." autocomplete="off">
+            <div id="artle-search-results"></div>
+        </div>
+
+        <table class="artle-table">
+            <tbody id="artle-history-body">
+            </tbody>
+        </table>
+
+        <button id="restart-btn">ZAGRAJ PONOWNIE ↻</button>
+
+        <a href="../index.html" class="home-btn" style="margin-top: 30px; display: inline-block;">← WRÓĆ DO KALENDARZA</a>
+    </div>
+</div>
+<script type="module" src="../assets/scripts/day13.js"></script>
+</body>
+</html>

@@ -19,27 +19,29 @@ const appCheck = initializeAppCheck(app, {
 });
 const db = getDatabase(app);
 
-const STORAGE_KEY = 'dlevent_day9_state';
+const STORAGE_KEY = 'dlevent_day12_state';
 
-let ELEMENTS_DB = [];
-let TARGET_ELEMENT = null;
+let PRODUCTS_DB = [];
+let TARGET_PRODUCT = null;
 
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 6;
 let attempts = 0;
 let isGameOver = false;
 let sessionCount = 1;
 let historyGuesses = [];
 
 let nick;
-let searchInput, searchResults, historyBody, messageEl, restartBtn, attemptsDisplay;
+let productName, productImg, priceInput, submitBtn, historyBody, messageEl, restartBtn, attemptsDisplay;
 let blocker, blockerTitle, blockerMsg;
 
 document.addEventListener('DOMContentLoaded', () => {
     nick = localStorage.getItem('dlevent_nickname');
 
-    searchInput = document.getElementById('element-search-input');
-    searchResults = document.getElementById('element-search-results');
-    historyBody = document.getElementById('elementle-history-body');
+    productName = document.getElementById('product-name');
+    productImg = document.getElementById('product-img');
+    priceInput = document.getElementById('cendle-price-input');
+    submitBtn = document.getElementById('submit-guess-btn');
+    historyBody = document.getElementById('cendle-history-body');
     messageEl = document.getElementById('message-area');
     restartBtn = document.getElementById('restart-btn');
     attemptsDisplay = document.getElementById('attempts-display');
@@ -48,11 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     blockerTitle = document.getElementById('blocker-title');
     blockerMsg = document.getElementById('blocker-msg');
 
-    searchInput.addEventListener('input', (e) => filterElements(e.target.value));
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.elementle-search-box')) {
-            searchResults.style.display = 'none';
-        }
+    submitBtn.addEventListener('click', handleGuess);
+    priceInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleGuess();
     });
 
     restartBtn.addEventListener('click', () => {
@@ -61,18 +61,18 @@ document.addEventListener('DOMContentLoaded', () => {
         prepareNewRound();
     });
 
-    loadElementsConfig().then(() => {
+    loadConfig().then(() => {
         start();
     });
 });
 
-async function loadElementsConfig() {
+async function loadConfig() {
     try {
-        const res = await fetch('../assets/scripts/day9config.json');
-        ELEMENTS_DB = await res.json();
+        const res = await fetch('../assets/scripts/day12config.json');
+        PRODUCTS_DB = await res.json();
     } catch (e) {
-        console.error("Błąd ładowania configu:", e);
-        messageEl.textContent = "Błąd bazy pierwiastków!";
+        console.error("Błąd configu:", e);
+        messageEl.textContent = "Błąd bazy produktów!";
     }
 }
 
@@ -84,133 +84,117 @@ async function start() {
 }
 
 function prepareNewRound() {
-    if (ELEMENTS_DB.length === 0) return;
+    if (PRODUCTS_DB.length === 0) return;
 
-    TARGET_ELEMENT = ELEMENTS_DB[Math.floor(Math.random() * ELEMENTS_DB.length)];
+    const randomProduct = PRODUCTS_DB[Math.floor(Math.random() * PRODUCTS_DB.length)];
+    TARGET_PRODUCT = randomProduct;
 
     attempts = 0;
     isGameOver = false;
     historyGuesses = [];
-    searchInput.value = '';
-    searchInput.disabled = false;
+
+    setupUI();
+    saveGameState();
+}
+
+function setupUI() {
+    priceInput.value = '';
+    priceInput.disabled = false;
+    submitBtn.disabled = false;
     restartBtn.style.display = 'none';
     messageEl.textContent = '';
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
     historyBody.innerHTML = '';
 
-    for(let i=0; i<MAX_ATTEMPTS; i++) {
-        const row = document.createElement('tr');
-        row.className = 'elementle-row empty-row';
-        row.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
-        historyBody.appendChild(row);
-    }
-
-    saveGameState();
+    productName.textContent = TARGET_PRODUCT.name;
+    productImg.src = TARGET_PRODUCT.img;
+    productImg.style.display = 'block';
 }
 
-function filterElements(query) {
-    if (query.length < 1) {
-        searchResults.style.display = 'none';
-        return;
-    }
-    const lower = query.toLowerCase();
-    const matches = ELEMENTS_DB.filter(e =>
-        e.name.toLowerCase().includes(lower) ||
-        e.symbol.toLowerCase() === lower
-    );
-
-    searchResults.innerHTML = '';
-    if (matches.length > 0) {
-        searchResults.style.display = 'block';
-        matches.slice(0, 10).forEach(e => {
-            const div = document.createElement('div');
-            div.className = 'element-search-item';
-            div.innerHTML = `<span>${e.name}</span> <span class="element-symbol">${e.symbol}</span>`;
-            div.addEventListener('click', () => handleGuess(e));
-            searchResults.appendChild(div);
-        });
-    } else {
-        searchResults.style.display = 'none';
-    }
-}
-
-function handleGuess(element) {
+function handleGuess() {
     if (isGameOver) return;
-    searchResults.style.display = 'none';
-    searchInput.value = '';
 
-    if (historyGuesses.some(g => g.name === element.name)) {
-        messageEl.textContent = "Ten pierwiastek już był!";
+    let rawVal = priceInput.value.replace(',', '.');
+    const val = parseFloat(rawVal);
+
+    if (isNaN(val) || val < 0) {
+        messageEl.textContent = "Podaj poprawną cenę!";
         return;
     }
+
+    const guessPrice = Math.round(val * 100) / 100;
 
     attempts++;
     attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
 
-    const isTarget = element.name === TARGET_ELEMENT.name;
+    historyGuesses.push(guessPrice);
 
-    const result = {
-        name: element.name,
-        symbol: element.symbol,
+    let status = '';
+    if (guessPrice === TARGET_PRODUCT.price) status = 'correct';
+    else if (guessPrice < TARGET_PRODUCT.price) status = 'higher';
+    else status = 'lower';
 
-        matchType: element.type === TARGET_ELEMENT.type,
-        matchReact: element.reactivity === TARGET_ELEMENT.reactivity,
-        matchGroup: element.groupProp === TARGET_ELEMENT.groupProp,
-        matchUnique: isTarget,
+    updateTable(guessPrice, status);
 
-        valType: element.type,
-        valReact: element.reactivity,
-        valGroup: element.groupProp,
-        valUnique: element.unique
-    };
-
-    historyGuesses.push(result);
-    updateTable(result);
-
-    if (isTarget) {
+    if (status === 'correct') {
         winGame();
     } else if (attempts >= MAX_ATTEMPTS) {
         loseGame();
+    } else {
+        priceInput.value = '';
+        priceInput.focus();
     }
     saveGameState();
 }
 
-function updateTable(res) {
-    const rows = historyBody.children;
-    const currentRow = rows[attempts - 1];
+function updateTable(guess, status) {
+    const row = document.createElement('tr');
+    row.className = 'cendle-row';
 
-    if (currentRow) {
-        currentRow.classList.remove('empty-row');
-        currentRow.innerHTML = `
-            <td><span class="periodic-tile">${res.symbol}</span>${res.name}</td>
-            <td class="${res.matchType ? 'ele-correct' : 'ele-wrong'}">${res.valType}</td>
-            <td class="${res.matchReact ? 'ele-correct' : 'ele-wrong'}">${res.valReact}</td>
-            <td class="${res.matchGroup ? 'ele-correct' : 'ele-wrong'}">${res.valGroup}</td>
-            <td class="${res.matchUnique ? 'ele-correct' : 'ele-wrong'}">${res.valUnique}</td>
-        `;
+    let icon = '';
+    let text = '';
+
+    if (status === 'correct') {
+        icon = '<span class="win-check">✅</span>';
+        text = 'IDEALNIE!';
+    } else if (status === 'higher') {
+        icon = '<span class="low-arrow">⬆️</span>';
+        text = 'Więcej';
+    } else {
+        icon = '<span class="high-arrow">⬇️</span>';
+        text = 'Mniej';
     }
+
+    row.innerHTML = `
+        <td>${guess.toFixed(2)} PLN</td>
+        <td>${icon} ${text}</td>
+    `;
+    historyBody.prepend(row);
 }
 
 function winGame() {
     isGameOver = true;
-    messageEl.textContent = "GRATULACJE!";
+    messageEl.textContent = "GRATULACJE! W punkt!";
     messageEl.style.color = "#00ff41";
-    searchInput.disabled = true;
+    priceInput.disabled = true;
+    submitBtn.disabled = true;
     saveWin();
 }
 
 function loseGame() {
     isGameOver = true;
-    messageEl.textContent = `KONIEC! To był: ${TARGET_ELEMENT.name}`;
+    const formattedPrice = TARGET_PRODUCT.price.toFixed(2);
+    messageEl.textContent = `KONIEC! Cena to: ${formattedPrice} PLN`;
     messageEl.style.color = "#ff3333";
-    searchInput.disabled = true;
+    priceInput.disabled = true;
+    submitBtn.disabled = true;
     restartBtn.style.display = 'block';
 }
 
 function saveGameState() {
     const state = {
         sessionCount,
-        targetName: TARGET_ELEMENT ? TARGET_ELEMENT.name : null,
+        productId: TARGET_PRODUCT ? TARGET_PRODUCT.id : null,
         attempts,
         historyGuesses,
         isGameOver
@@ -220,44 +204,40 @@ function saveGameState() {
 
 function loadGameState() {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    if (saved && PRODUCTS_DB.length > 0) {
         const state = JSON.parse(saved);
         sessionCount = state.sessionCount || 1;
 
-        if (state.targetName && ELEMENTS_DB.length > 0) {
-            TARGET_ELEMENT = ELEMENTS_DB.find(e => e.name === state.targetName);
-            if (!TARGET_ELEMENT) { prepareNewRound(); return; }
+        if (state.productId) {
+            const found = PRODUCTS_DB.find(p => p.id === state.productId);
+            if (!found) { prepareNewRound(); return; }
+
+            TARGET_PRODUCT = found;
 
             attempts = state.attempts;
             historyGuesses = state.historyGuesses || [];
             isGameOver = state.isGameOver;
 
-            attemptsDisplay.textContent = `Próby: ${attempts}/${MAX_ATTEMPTS}`;
-            historyBody.innerHTML = '';
+            setupUI();
 
-            for(let i=0; i<MAX_ATTEMPTS; i++) {
-                const row = document.createElement('tr');
-                row.className = 'elementle-row empty-row';
-                row.innerHTML = `<td></td><td></td><td></td><td></td><td></td>`;
-                historyBody.appendChild(row);
-            }
-
-            const savedAttempts = attempts;
-            attempts = 0;
-            historyGuesses.forEach(res => {
-                attempts++;
-                updateTable(res);
+            historyGuesses.forEach(guess => {
+                let status = '';
+                if (guess === TARGET_PRODUCT.price) status = 'correct';
+                else if (guess < TARGET_PRODUCT.price) status = 'higher';
+                else status = 'lower';
+                updateTable(guess, status);
             });
-            attempts = savedAttempts;
 
             if (isGameOver) {
-                searchInput.disabled = true;
+                priceInput.disabled = true;
+                submitBtn.disabled = true;
                 const last = historyGuesses[historyGuesses.length-1];
-                if (last && last.matchUnique) {
+                if (last === TARGET_PRODUCT.price) {
                     messageEl.textContent = "GRATULACJE! (Odświeżono)";
                     messageEl.style.color = "#00ff41";
                 } else {
-                    messageEl.textContent = `KONIEC! To był: ${TARGET_ELEMENT.name}`;
+                    const formattedPrice = TARGET_PRODUCT.price.toFixed(2);
+                    messageEl.textContent = `KONIEC! Cena to: ${formattedPrice} PLN`;
                     messageEl.style.color = "#ff3333";
                     restartBtn.style.display = 'block';
                 }
@@ -276,7 +256,7 @@ async function checkAccess() {
         return false;
     }
     const today = new Date();
-    const releaseDate = new Date(2025, 11, 9);
+    const releaseDate = new Date(2025, 10, 12);
 
     if (today < releaseDate) {
         showBlocker("NIE OSZUKUJ!", "To zadanie nie jest jeszcze dostępne.");
@@ -287,7 +267,7 @@ async function checkAccess() {
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
             const data = snapshot.val();
-            if (data.completedDays && data.completedDays.includes(9)) {
+            if (data.completedDays && data.completedDays.includes(12)) {
                 showBlocker("UKOŃCZONE", "Ta gra została już ukończona!");
                 return false;
             }
@@ -309,7 +289,7 @@ function showBlocker(title, msg) {
 async function saveWin() {
     if (!nick) return;
     const today = new Date();
-    const releaseDate = new Date(2025, 11, 9);
+    const releaseDate = new Date(2025, 11, 12);
     const isReleaseDay = (today.getDate() === releaseDate.getDate() && today.getMonth() === releaseDate.getMonth() && today.getFullYear() === releaseDate.getFullYear());
 
     let pointsEarned = 5;
@@ -324,8 +304,8 @@ async function saveWin() {
     if (snapshot.exists()) {
         const data = snapshot.val();
         let completedDays = data.completedDays || [];
-        if (!completedDays.includes(9)) {
-            completedDays.push(9);
+        if (!completedDays.includes(12)) {
+            completedDays.push(12);
             const newScore = (data.score || 0) + pointsEarned;
             await update(userRef, { score: newScore, completedDays: completedDays });
             messageEl.textContent += ` (+${pointsEarned} PKT)`;
