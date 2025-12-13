@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 DLEVENT - Dzień 14</title>
+    <link rel="stylesheet" href="../assets/stylesheets/styles.css">
+</head>
+<body>
+
+<div id="access-blocker">
+    <h1 id="blocker-title">BŁĄD</h1>
+    <p id="blocker-msg">Brak dostępu.</p>
+    <a href="../index.html"><button>WRÓĆ DO MENU</button></a>
+</div>
+
+<div class="container">
+    <header class="main-header">
+        <h1>🎄 DZIEŃ 14 - OCTORDLE</h1>
+        <p>I tak dobiega końca Dlevent 2025 który, pomimo że miał trwać do 24 grudnia, został skrócony przez bezpieczeństwo bazy danych. Na ostatni dzień przygotowałem coś, co znamy z pierwszego dnia tylko w większej skali. 8 słów, 14 prób.</p>
+    </header>
+
+    <div class="octordle-container">
+        <div id="message-area" style="height: 25px; color: var(--primary-green); text-align: center; font-weight: bold;"></div>
+
+        <div class="octo-boards-wrapper" id="boards-container">
+        </div>
+
+        <div class="keyboard-container" id="keyboard">
+        </div>
+
+        <button id="restart-btn" style="display:none; margin: 20px auto; width:100%; max-width:300px; padding:15px; background:var(--primary-green); border:none; font-weight:bold; cursor:pointer; border-radius: 8px; color: #000;">
+            NOWA GRA ↻
+        </button>
+
+        <a href="../index.html" class="home-btn" style="margin-top: 30px; display: inline-block;">← WRÓĆ DO KALENDARZA</a>
+    </div>
+</div>
+<script type="module" src="../assets/scripts/day14.js"></script>
+</body>
+</html>

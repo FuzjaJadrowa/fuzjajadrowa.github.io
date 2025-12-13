@@ -164,7 +164,7 @@ function renderGrid(completedDays = []) {
     const releaseYear = 2025;
     const releaseMonth = 11;
 
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 14; i++) {
         const btn = document.createElement('button');
         btn.classList.add('day-btn');
 

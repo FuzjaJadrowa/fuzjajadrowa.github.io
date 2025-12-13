@@ -630,32 +630,3 @@ footer {
 .language-toggle button:hover {
     transform: scale(1.1);
 }
-/* DLEVENT */
-.dlevent {
-    padding: 100px 20px;
-    text-align: center;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.dlevent-title {
-    font-size: 42px;
-    font-weight: 900;
-    margin-bottom: 20px;
-    color: #00ff41;
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
-
-.dlevent-text {
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 40px;
-    color: #e0e0e0;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}

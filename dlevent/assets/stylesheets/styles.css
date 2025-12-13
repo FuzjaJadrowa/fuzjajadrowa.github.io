@@ -1600,3 +1600,116 @@ footer {
 
 .status-wrong { color: #ff3333; }
 .status-correct { color: #00ff41; }
+
+.octordle-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.octo-boards-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1000px) {
+    .octo-boards-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.octo-board {
+    background: #111;
+    border: 1px solid #333;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.octo-board.solved {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.1);
+    opacity: 0.6;
+}
+
+.octo-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    height: 24px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.octo-row.current {
+    height: 40px;
+    opacity: 1;
+    margin: 5px 0;
+}
+
+.octo-tile {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #444;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.octo-row.current .octo-tile {
+    font-size: 20px;
+    border-color: #888;
+    border-width: 2px;
+}
+
+.octo-tile.correct { background-color: var(--primary-green); border-color: var(--primary-green); color: #000; }
+.octo-tile.present { background-color: #d4a017; border-color: #d4a017; color: #000; }
+.octo-tile.absent { background-color: #3a3a3a; border-color: #3a3a3a; }
+
+.keyboard-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+.key-row {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.key {
+    font-weight: bold;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    background-color: #818384;
+    color: #ffffff;
+    border-radius: 4px;
+    height: 58px;
+    min-width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+    font-size: 14px;
+    user-select: none;
+}
+
+.key.wide {
+    min-width: 65px;
+    font-size: 12px;
+}
