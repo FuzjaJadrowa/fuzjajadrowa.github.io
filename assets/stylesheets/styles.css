@@ -144,6 +144,7 @@ body {
     margin: 0 auto;
     padding: 80px 60px;
     color: #fff;
+    text-align: center;
 }
 
 .about-text h2 {
@@ -151,21 +152,21 @@ body {
     font-weight: 900;
     color: #fff;
     margin-bottom: 20px;
-    text-align: left;
+    text-align: center;
 }
 
 .about-text h3 {
     font-size: 24px;
     font-weight: 700;
     margin: 30px 0 15px;
-    text-align: left;
+    text-align: center;
 }
 
 .about-text p {
     font-size: 18px;
     line-height: 1.6;
     margin-bottom: 20px;
-    text-align: left;
+    text-align: center;
 }
 
 .bold { font-weight: 700; }
@@ -176,6 +177,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    justify-content: center;
 }
 
 .btn {
@@ -357,6 +359,7 @@ body {
     margin: 0 auto;
     padding: 80px 60px;
     color: #fff;
+    text-align: center;
 }
 
 .contact-title {
@@ -367,7 +370,7 @@ body {
 
 .contact-text {
     flex: 1;
-    text-align: left;
+    text-align: center;
 }
 
 .contact-text p {
@@ -376,10 +379,12 @@ body {
     margin-bottom: 30px;
     max-width: 600px;
     word-wrap: break-word;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .email-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
