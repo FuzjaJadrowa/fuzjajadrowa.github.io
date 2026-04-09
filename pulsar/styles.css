@@ -523,35 +523,35 @@ main {
 
 .showcase-shots {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  max-width: 1000px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
 .shot-card {
   background: rgba(10, 16, 24, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
-  padding: 12px;
+  border-radius: 24px;
+  padding: 16px;
   text-align: center;
 }
 
 .shot-image {
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   object-fit: cover;
   display: block;
-  margin-bottom: 12px;
-  min-height: 120px;
+  margin-bottom: 14px;
+  min-height: 260px;
   background: rgba(255, 255, 255, 0.04);
 }
 
 .shot-card figcaption {
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .source-panel {
@@ -796,6 +796,16 @@ main {
   pointer-events: none;
   opacity: 0.5;
   box-shadow: none;
+}
+
+.platform-download--soon {
+  border: none;
+  cursor: default;
+  font-family: inherit;
+}
+
+.platform-download--soon:hover {
+  transform: none;
 }
 
 .download-modal__info {

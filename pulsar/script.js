@@ -255,9 +255,7 @@ const platformMatchers = {
     portable: [/\.app\.tar\.gz$/i, /\.tar\.gz$/i],
   },
   linux: {
-    appimage: [/\.appimage$/i],
     deb: [/\.deb$/i],
-    portable: [/\.tar\.gz$/i],
   },
 };
 
@@ -287,6 +285,10 @@ const formatDownloads = (value) => {
 
 const setHeroDownloads = (value) => {
   if (!heroDownloads) return;
+  if (typeof value === 'undefined') {
+    heroDownloads.textContent = t('hero.downloadsPlaceholder');
+    return;
+  }
   if (typeof value === 'number') {
     const formatted = formatDownloads(value);
     if (formatted) {
@@ -350,9 +352,7 @@ const applyReleaseData = (data) => {
   setPlatformAsset('windows', 'portable', pickAsset(assets, platformMatchers.windows.portable, used));
   setPlatformAsset('macos', 'installer', pickAsset(assets, platformMatchers.macos.installer, used));
   setPlatformAsset('macos', 'portable', pickAsset(assets, platformMatchers.macos.portable, used));
-  setPlatformAsset('linux', 'appimage', pickAsset(assets, platformMatchers.linux.appimage, used));
   setPlatformAsset('linux', 'deb', pickAsset(assets, platformMatchers.linux.deb, used));
-  setPlatformAsset('linux', 'portable', pickAsset(assets, platformMatchers.linux.portable, used));
 };
 
 const applyReleaseError = () => {
@@ -365,9 +365,7 @@ const applyReleaseError = () => {
   setPlatformAsset('windows', 'portable', null);
   setPlatformAsset('macos', 'installer', null);
   setPlatformAsset('macos', 'portable', null);
-  setPlatformAsset('linux', 'appimage', null);
   setPlatformAsset('linux', 'deb', null);
-  setPlatformAsset('linux', 'portable', null);
 };
 
 const reapplyDynamicTexts = () => {
@@ -378,6 +376,8 @@ const reapplyDynamicTexts = () => {
   }
   if (lastDownloadsTotal !== undefined) {
     setHeroDownloads(lastDownloadsTotal);
+  } else {
+    setHeroDownloads(undefined);
   }
 };
 
