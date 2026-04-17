@@ -77,7 +77,7 @@
   "download.asset.installerPkg": "Установщик (.pkg)",
   "download.asset.portableAppTar": "Портативная (.app.tar.gz)",
   "download.asset.portableAppImage": "Портативная (.AppImage)",
-  "download.asset.flatpakSoon": "Flatpak (скоро)",
+  "download.asset.flatpak": "Flatpak",
   "download.asset.debianDeb": "Установщик Debian (.deb)",
   "download.asset.portableTarGz": "Портативная (.tar.gz)",
   "download.assetUnavailable": "недоступно",
